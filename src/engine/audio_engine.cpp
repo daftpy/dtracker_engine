@@ -34,6 +34,7 @@ namespace dtracker::engine
             deviceId = *fallbackId;
             info = m_audio->getDeviceInfo(deviceId);
         }
+        m_currentDeviceInfo = info;
 
         std::cout << "Using device: " << info.name << " (" << deviceId << ")\n";
         std::cout << "Output channels: " << info.outputChannels << "\n";
@@ -70,6 +71,11 @@ namespace dtracker::engine
     {
         // Return the device info for a given device ID
         return m_audio->getDeviceInfo(id);
+    }
+
+    RtAudio::DeviceInfo dtracker::engine::AudioEngine::currentDeviceInfo()
+    {
+        return m_currentDeviceInfo;
     }
 
 } // namespace dtracker::engine
