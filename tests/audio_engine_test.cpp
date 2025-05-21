@@ -2,8 +2,8 @@
 
 #include <engine/audio_engine.hpp>
 
-TEST(AudioEngineTest, StartsSuccessfully)
+TEST(AudioEngine, StartsSuccessfully)
 {
     dtracker::engine::AudioEngine engine;
-    EXPECT_TRUE(engine.start());
+    EXPECT_TRUE(engine.start()) << "No usable output device found";
 }
