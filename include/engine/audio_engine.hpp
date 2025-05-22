@@ -2,7 +2,7 @@
 #include <RtAudio.h>
 
 #include "audio/waves/sine_wav.hpp"
-#include "audio_settings.hpp"
+#include "types/audio_settings.hpp"
 #include <memory>
 #include <optional>
 
