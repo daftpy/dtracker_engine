@@ -105,6 +105,16 @@ namespace dtracker::engine
         return true;
     }
 
+    bool AudioEngine::isStreamOpen() const
+    {
+        return m_audio->isStreamOpen();
+    }
+
+    bool AudioEngine::isStreamRunning() const
+    {
+        return m_audio->isStreamRunning();
+    }
+
     std::optional<unsigned int> AudioEngine::findUsableOutputDevice()
     {
         // Iterate through all available devices

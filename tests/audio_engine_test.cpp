@@ -6,6 +6,10 @@ TEST(AudioEngine, StartsSuccessfully)
 {
     dtracker::engine::AudioEngine engine;
     EXPECT_TRUE(engine.start()) << "No usable output device found";
+
+    EXPECT_TRUE(engine.isStreamOpen()) << "Stream failed to open";
+
+    EXPECT_TRUE(engine.isStreamRunning()) << "Stream stopped running";
 }
 
 TEST(AudioEngineDeviceTest, DeviceInfoHasOutputChannels)
