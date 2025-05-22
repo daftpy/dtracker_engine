@@ -1,13 +1,34 @@
 #include "engine/audio_engine.hpp"
 
+#include <RtAudio.h>
+
 #include <iostream>
 
 namespace dtracker::engine
 {
+    int audioCallback(void *outputBuffer, void * /*inputBuffer*/,
+                      unsigned int nFrames, double /*streamTime*/,
+                      RtAudioStreamStatus status, void * /*userData*/)
+    {
+        if (status)
+            std::cerr << "Stream underflow/overflow detected!\n";
+
+        // Stereo float32 = 2 samples per frame
+        std::memset(outputBuffer, 0, nFrames * sizeof(float) * 2);
+        return 0;
+    }
 
     AudioEngine::AudioEngine() : m_audio(std::make_unique<RtAudio>())
     {
         std::cout << "AudioEngine: Initialized\n";
+
+        // Setup error callback
+        m_audio->setErrorCallback(
+            [](RtAudioErrorType type, const std::string &errorText)
+            {
+                std::cerr << "[RtAudio Error] (" << static_cast<int>(type)
+                          << "): " << errorText << "\n";
+            });
     }
 
     bool AudioEngine::start()
@@ -40,8 +61,8 @@ namespace dtracker::engine
         std::cout << "Using device: " << info.name << " (" << deviceId << ")\n";
         std::cout << "Output channels: " << info.outputChannels << "\n";
 
-        // TODO: open stream
-        return true;
+        // Open the stream
+        return openAndStartStream(deviceId);
     }
 
     void AudioEngine::stop()
@@ -49,6 +70,39 @@ namespace dtracker::engine
         if (!m_started)
             return;
         std::cout << "AudioEngine: Engine stopped\n";
+    }
+
+    bool AudioEngine::openAndStartStream(unsigned int deviceId)
+    {
+        RtAudio::StreamParameters outputParams;
+        outputParams.deviceId = deviceId;
+        outputParams.nChannels = m_settings.outputChannels;
+        outputParams.firstChannel = 0;
+
+        // Open stream
+        auto err =
+            m_audio->openStream(&outputParams,
+                                nullptr, // No input
+                                RTAUDIO_FLOAT32, m_settings.sampleRate,
+                                &m_settings.bufferFrames, &audioCallback, this);
+
+        if (err != RTAUDIO_NO_ERROR)
+        {
+            std::cerr << "AudioEngine: Failed to open stream: "
+                      << m_audio->getErrorText() << "\n";
+            return false;
+        }
+
+        // Start stream
+        err = m_audio->startStream();
+        if (err != RTAUDIO_NO_ERROR)
+        {
+            std::cerr << "AudioEngine: Failed to start stream: "
+                      << m_audio->getErrorText() << "\n";
+            return false;
+        }
+
+        return true;
     }
 
     std::optional<unsigned int> AudioEngine::findUsableOutputDevice()

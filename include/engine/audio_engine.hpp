@@ -18,6 +18,8 @@ namespace dtracker::engine
 
         RtAudio::DeviceInfo currentDeviceInfo() const;
 
+        bool openAndStartStream(unsigned int deviceId);
+
         // vars
         bool m_started{false};
 
