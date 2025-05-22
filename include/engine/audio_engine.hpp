@@ -10,11 +10,16 @@ namespace dtracker::engine
     class AudioEngine
     {
       public:
+        // funcs
         AudioEngine();
+
         bool start();
         void stop();
 
-        RtAudio::DeviceInfo currentDeviceInfo();
+        RtAudio::DeviceInfo currentDeviceInfo() const;
+
+        // vars
+        bool m_started{false};
 
       private:
         // funcs

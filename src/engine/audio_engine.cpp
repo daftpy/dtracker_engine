@@ -35,6 +35,7 @@ namespace dtracker::engine
             info = m_audio->getDeviceInfo(deviceId);
         }
         m_currentDeviceInfo = info;
+        m_started = true;
 
         std::cout << "Using device: " << info.name << " (" << deviceId << ")\n";
         std::cout << "Output channels: " << info.outputChannels << "\n";
@@ -45,6 +46,8 @@ namespace dtracker::engine
 
     void AudioEngine::stop()
     {
+        if (!m_started)
+            return;
         std::cout << "AudioEngine: Engine stopped\n";
     }
 
@@ -73,7 +76,7 @@ namespace dtracker::engine
         return m_audio->getDeviceInfo(id);
     }
 
-    RtAudio::DeviceInfo dtracker::engine::AudioEngine::currentDeviceInfo()
+    RtAudio::DeviceInfo dtracker::engine::AudioEngine::currentDeviceInfo() const
     {
         return m_currentDeviceInfo;
     }
