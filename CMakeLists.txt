@@ -37,8 +37,8 @@ FetchContent_MakeAvailable(RtAudio)
 
 # --- dtracker_engine static lib ---
 add_library(dtracker_engine STATIC
-    src/engine/audio_engine.cpp
-    src/engine/device_manager.cpp
+    src/audio/engine.cpp
+    src/audio/device_manager.cpp
 )
 
 target_link_libraries(dtracker_engine PUBLIC rtaudio)

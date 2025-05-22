@@ -1,10 +1,10 @@
-#include "engine/device_manager.hpp"
+#include "audio/device_manager.hpp"
 
 #include <RtAudio.h>
 
 #include <iostream>
 
-namespace dtracker::engine
+namespace dtracker::audio
 {
 
     // Initializes DeviceManager with a pointer to an
@@ -92,4 +92,4 @@ namespace dtracker::engine
         return m_currentDeviceInfo;
     }
 
-} // namespace dtracker::engine
+} // namespace dtracker::audio

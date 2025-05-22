@@ -7,13 +7,13 @@
 #include <memory>
 #include <optional>
 
-namespace dtracker::engine
+namespace dtracker::audio
 {
-    class AudioEngine
+    class Engine
     {
       public:
         // funcs
-        AudioEngine();
+        Engine();
 
         bool start();
         void stop();
@@ -35,4 +35,4 @@ namespace dtracker::engine
         DeviceManager m_deviceManager;
         std::unique_ptr<audio::types::waves::SineWave> m_sine;
     };
-} // namespace dtracker::engine
+} // namespace dtracker::audio

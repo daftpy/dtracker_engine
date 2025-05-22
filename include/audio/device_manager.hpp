@@ -6,8 +6,7 @@
 #include <memory>
 #include <optional>
 
-
-namespace dtracker::engine
+namespace dtracker::audio
 {
     class DeviceManager
     {
@@ -26,4 +25,4 @@ namespace dtracker::engine
         RtAudio *m_audio{nullptr};
         std::optional<RtAudio::DeviceInfo> m_currentDeviceInfo;
     };
-} // namespace dtracker::engine
+} // namespace dtracker::audio

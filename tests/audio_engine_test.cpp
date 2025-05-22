@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <engine/audio_engine.hpp>
-#include <engine/device_manager.hpp>
-
+#include <audio/engine.hpp>
+#include <audio/device_manager.hpp>
 
 // -------------------------
 // AudioEngine Integration Tests
@@ -10,7 +9,7 @@
 
 TEST(AudioEngine, StartsSuccessfully)
 {
-    dtracker::engine::AudioEngine engine;
+    dtracker::audio::Engine engine;
     EXPECT_TRUE(engine.start())
         << "AudioEngine failed to start: No usable output device found";
 
@@ -21,7 +20,7 @@ TEST(AudioEngine, StartsSuccessfully)
 
 TEST(AudioEngine, StopsAndClosesStream)
 {
-    dtracker::engine::AudioEngine engine;
+    dtracker::audio::Engine engine;
     ASSERT_TRUE(engine.start());
 
     engine.stop();
@@ -34,7 +33,7 @@ TEST(AudioEngine, StopsAndClosesStream)
 
 TEST(AudioEngine, ProvidesValidDeviceInfo)
 {
-    dtracker::engine::AudioEngine engine;
+    dtracker::audio::Engine engine;
     ASSERT_TRUE(engine.start());
 
     auto infoOpt = engine.currentDeviceInfo();
@@ -53,7 +52,7 @@ TEST(AudioEngine, ProvidesValidDeviceInfo)
 TEST(DeviceManager, InitializesWithValidDevice)
 {
     RtAudio audio;
-    dtracker::engine::DeviceManager manager(&audio);
+    dtracker::audio::DeviceManager manager(&audio);
 
     auto infoOpt = manager.currentDeviceInfo();
     ASSERT_TRUE(infoOpt.has_value())

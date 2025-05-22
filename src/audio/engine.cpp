@@ -1,4 +1,4 @@
-#include "engine/audio_engine.hpp"
+#include "audio/engine.hpp"
 
 #include <iostream>
 
@@ -6,7 +6,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-namespace dtracker::engine
+namespace dtracker::audio
 {
 
     // Static callback used by RtAudio to fill the audio buffer
@@ -42,7 +42,7 @@ namespace dtracker::engine
     }
 
     // Initializes audio system and device manager
-    AudioEngine::AudioEngine()
+    Engine::Engine()
         : m_audio(std::make_unique<RtAudio>()),
           m_deviceManager(m_audio.get()) // Pass raw pointer to DeviceManager
     {
@@ -59,7 +59,7 @@ namespace dtracker::engine
 
     // Starts the audio engine, opening and running the stream if a device is
     // available
-    bool AudioEngine::start()
+    bool Engine::start()
     {
         std::cout << "AudioEngine: Starting...\n";
 
@@ -88,7 +88,7 @@ namespace dtracker::engine
     }
 
     // Stops and closes the stream if running
-    void AudioEngine::stop()
+    void Engine::stop()
     {
         if (!m_started)
             return;
@@ -115,7 +115,7 @@ namespace dtracker::engine
     }
 
     // Configures and opens the output stream with the selected device
-    bool AudioEngine::openAndStartStream(unsigned int deviceId)
+    bool Engine::openAndStartStream(unsigned int deviceId)
     {
         RtAudio::StreamParameters outputParams;
         outputParams.deviceId = deviceId;
@@ -148,21 +148,21 @@ namespace dtracker::engine
     }
 
     // Returns true if a stream is open
-    bool AudioEngine::isStreamOpen() const
+    bool Engine::isStreamOpen() const
     {
         return m_audio->isStreamOpen();
     }
 
     // Returns true if the stream is currently running
-    bool AudioEngine::isStreamRunning() const
+    bool Engine::isStreamRunning() const
     {
         return m_audio->isStreamRunning();
     }
 
     // Delegates the current device info lookup to DeviceManager
-    std::optional<RtAudio::DeviceInfo> AudioEngine::currentDeviceInfo() const
+    std::optional<RtAudio::DeviceInfo> Engine::currentDeviceInfo() const
     {
         return m_deviceManager.currentDeviceInfo();
     }
 
-} // namespace dtracker::engine
+} // namespace dtracker::audio
