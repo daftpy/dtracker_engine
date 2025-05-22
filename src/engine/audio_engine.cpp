@@ -4,17 +4,38 @@
 
 #include <iostream>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace dtracker::engine
 {
     int audioCallback(void *outputBuffer, void * /*inputBuffer*/,
                       unsigned int nFrames, double /*streamTime*/,
-                      RtAudioStreamStatus status, void * /*userData*/)
+                      RtAudioStreamStatus status, void *userData)
     {
         if (status)
             std::cerr << "Stream underflow/overflow detected!\n";
 
-        // Stereo float32 = 2 samples per frame
-        std::memset(outputBuffer, 0, nFrames * sizeof(float) * 2);
+        auto *sine = static_cast<audio::waves::SineWave *>(userData);
+        float *buffer = static_cast<float *>(outputBuffer);
+
+        const float twoPi = 2.0f * static_cast<float>(M_PI);
+        const float phaseIncrement = twoPi * sine->frequency / sine->sampleRate;
+
+        std::cerr << "Callback running: nFrames=" << nFrames << "\n";
+        for (unsigned int i = 0; i < nFrames; ++i)
+        {
+            float sample = std::sin(sine->phase);
+            sine->phase += phaseIncrement;
+            if (sine->phase >= twoPi)
+                sine->phase -= twoPi;
+
+            // Write to both stereo channels
+            buffer[2 * i] = sample;     // Left
+            buffer[2 * i + 1] = sample; // Right
+        }
+
         return 0;
     }
 
@@ -61,6 +82,9 @@ namespace dtracker::engine
         std::cout << "Using device: " << info.name << " (" << deviceId << ")\n";
         std::cout << "Output channels: " << info.outputChannels << "\n";
 
+        m_sine = std::make_unique<audio::waves::SineWave>();
+        m_sine->sampleRate = static_cast<float>(m_settings.sampleRate);
+
         // Open the stream
         return openAndStartStream(deviceId);
     }
@@ -99,11 +123,9 @@ namespace dtracker::engine
         outputParams.firstChannel = 0;
 
         // Open stream
-        auto err =
-            m_audio->openStream(&outputParams,
-                                nullptr, // No input
-                                RTAUDIO_FLOAT32, m_settings.sampleRate,
-                                &m_settings.bufferFrames, &audioCallback, this);
+        auto err = m_audio->openStream(
+            &outputParams, nullptr, RTAUDIO_FLOAT32, m_settings.sampleRate,
+            &m_settings.bufferFrames, &audioCallback, m_sine.get());
 
         if (err != RTAUDIO_NO_ERROR)
         {
