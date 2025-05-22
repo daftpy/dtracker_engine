@@ -1,7 +1,5 @@
 #include "engine/audio_engine.hpp"
 
-#include <RtAudio.h>
-
 #include <iostream>
 
 #ifndef M_PI
@@ -21,7 +19,7 @@ namespace dtracker::engine
             std::cerr << "Stream underflow/overflow detected!\n";
 
         // Cast the provided user data to a SineWave generator
-        auto *sine = static_cast<audio::waves::SineWave *>(userData);
+        auto *sine = static_cast<audio::types::waves::SineWave *>(userData);
         float *buffer = static_cast<float *>(outputBuffer);
 
         const float twoPi = 2.0f * static_cast<float>(M_PI);
@@ -78,7 +76,7 @@ namespace dtracker::engine
             std::cout << "Output channels: " << info.outputChannels << "\n";
 
             // Initialize sine wave generator for output
-            m_sine = std::make_unique<audio::waves::SineWave>();
+            m_sine = std::make_unique<audio::types::waves::SineWave>();
             m_sine->sampleRate = static_cast<float>(m_settings.sampleRate);
 
             // Open and start the audio stream

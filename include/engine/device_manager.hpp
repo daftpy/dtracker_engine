@@ -1,10 +1,11 @@
 #pragma once
 #include <RtAudio.h>
 
-#include "audio/waves/sine_wav.hpp"
-#include "types/audio_settings.hpp"
+#include "audio/types/audio_settings.hpp"
+#include "audio/types/waves/sine_wav.hpp"
 #include <memory>
 #include <optional>
+
 
 namespace dtracker::engine
 {

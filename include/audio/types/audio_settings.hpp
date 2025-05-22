@@ -1,6 +1,6 @@
 #pragma once
 
-namespace dtracker::engine
+namespace dtracker::audio::types
 {
     struct AudioSettings
     {
@@ -8,4 +8,4 @@ namespace dtracker::engine
         unsigned int bufferFrames = 512;
         unsigned int outputChannels = 2;
     };
-} // namespace dtracker::engine
+} // namespace dtracker::audio::types

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace dtracker::audio::waves
+namespace dtracker::audio::types::waves
 {
     struct SineWave
     {
@@ -8,4 +8,4 @@ namespace dtracker::audio::waves
         float frequency = 440.0f; // A4
         float sampleRate = 44100.0f;
     };
-} // namespace dtracker::audio::waves
+} // namespace dtracker::audio::types::waves
