@@ -10,19 +10,24 @@
 
 namespace dtracker::engine
 {
+
+    // Static callback used by RtAudio to fill the audio buffer
     int audioCallback(void *outputBuffer, void * /*inputBuffer*/,
                       unsigned int nFrames, double /*streamTime*/,
                       RtAudioStreamStatus status, void *userData)
     {
+        // Notify of any stream underflow or overflow issues
         if (status)
             std::cerr << "Stream underflow/overflow detected!\n";
 
+        // Cast the provided user data to a SineWave generator
         auto *sine = static_cast<audio::waves::SineWave *>(userData);
         float *buffer = static_cast<float *>(outputBuffer);
 
         const float twoPi = 2.0f * static_cast<float>(M_PI);
         const float phaseIncrement = twoPi * sine->frequency / sine->sampleRate;
 
+        // Fill buffer with sine wave samples for both stereo channels
         std::cerr << "Callback running: nFrames=" << nFrames << "\n";
         for (unsigned int i = 0; i < nFrames; ++i)
         {
@@ -31,19 +36,21 @@ namespace dtracker::engine
             if (sine->phase >= twoPi)
                 sine->phase -= twoPi;
 
-            // Write to both stereo channels
-            buffer[2 * i] = sample;     // Left
-            buffer[2 * i + 1] = sample; // Right
+            buffer[2 * i] = sample;     // Left channel
+            buffer[2 * i + 1] = sample; // Right channel
         }
 
         return 0;
     }
 
-    AudioEngine::AudioEngine() : m_audio(std::make_unique<RtAudio>())
+    // Initializes audio system and device manager
+    AudioEngine::AudioEngine()
+        : m_audio(std::make_unique<RtAudio>()),
+          m_deviceManager(m_audio.get()) // Pass raw pointer to DeviceManager
     {
         std::cout << "AudioEngine: Initialized\n";
 
-        // Setup error callback
+        // Install error callback to handle RtAudio runtime issues
         m_audio->setErrorCallback(
             [](RtAudioErrorType type, const std::string &errorText)
             {
@@ -52,43 +59,37 @@ namespace dtracker::engine
             });
     }
 
+    // Starts the audio engine, opening and running the stream if a device is
+    // available
     bool AudioEngine::start()
     {
         std::cout << "AudioEngine: Starting...\n";
 
-        // Get the default system audio device
-        unsigned int deviceId = m_audio->getDefaultOutputDevice();
-        RtAudio::DeviceInfo info = m_audio->getDeviceInfo(deviceId);
+        auto currentDeviceInfo = m_deviceManager.currentDeviceInfo();
 
-        // Search for a fallback audio device if lacking channels
-        if (info.outputChannels == 0)
+        // Only proceed if a valid device was found
+        if (currentDeviceInfo.has_value())
         {
-            std::cout << "Default device has no output channels. Searching for "
-                         "fallback...\n";
-            auto fallbackId = findUsableOutputDevice();
+            auto &info = currentDeviceInfo.value();
+            m_started = true;
 
-            // Return false if no suitable callback is found
-            if (!fallbackId)
-            {
-                std::cout << "No usable output devices found.\n";
-                return false;
-            }
-            deviceId = *fallbackId;
-            info = m_audio->getDeviceInfo(deviceId);
+            std::cout << "Using device: " << info.name << " (" << info.ID
+                      << ")\n";
+            std::cout << "Output channels: " << info.outputChannels << "\n";
+
+            // Initialize sine wave generator for output
+            m_sine = std::make_unique<audio::waves::SineWave>();
+            m_sine->sampleRate = static_cast<float>(m_settings.sampleRate);
+
+            // Open and start the audio stream
+            return openAndStartStream(info.ID);
         }
-        m_currentDeviceInfo = info;
-        m_started = true;
 
-        std::cout << "Using device: " << info.name << " (" << deviceId << ")\n";
-        std::cout << "Output channels: " << info.outputChannels << "\n";
-
-        m_sine = std::make_unique<audio::waves::SineWave>();
-        m_sine->sampleRate = static_cast<float>(m_settings.sampleRate);
-
-        // Open the stream
-        return openAndStartStream(deviceId);
+        std::cerr << "AudioEngine: No valid output device found\n";
+        return false;
     }
 
+    // Stops and closes the stream if running
     void AudioEngine::stop()
     {
         if (!m_started)
@@ -107,7 +108,7 @@ namespace dtracker::engine
 
         if (m_audio->isStreamOpen())
         {
-            // No return value — errors will go through error callback
+            // Close the stream; errors go through the callback
             m_audio->closeStream();
         }
 
@@ -115,6 +116,7 @@ namespace dtracker::engine
         std::cout << "AudioEngine: Engine stopped\n";
     }
 
+    // Configures and opens the output stream with the selected device
     bool AudioEngine::openAndStartStream(unsigned int deviceId)
     {
         RtAudio::StreamParameters outputParams;
@@ -122,7 +124,7 @@ namespace dtracker::engine
         outputParams.nChannels = m_settings.outputChannels;
         outputParams.firstChannel = 0;
 
-        // Open stream
+        // Attempt to open the audio stream with a sine wave generator
         auto err = m_audio->openStream(
             &outputParams, nullptr, RTAUDIO_FLOAT32, m_settings.sampleRate,
             &m_settings.bufferFrames, &audioCallback, m_sine.get());
@@ -134,7 +136,7 @@ namespace dtracker::engine
             return false;
         }
 
-        // Start stream
+        // Start the stream
         err = m_audio->startStream();
         if (err != RTAUDIO_NO_ERROR)
         {
@@ -147,44 +149,22 @@ namespace dtracker::engine
         return true;
     }
 
+    // Returns true if a stream is open
     bool AudioEngine::isStreamOpen() const
     {
         return m_audio->isStreamOpen();
     }
 
+    // Returns true if the stream is currently running
     bool AudioEngine::isStreamRunning() const
     {
         return m_audio->isStreamRunning();
     }
 
-    std::optional<unsigned int> AudioEngine::findUsableOutputDevice()
+    // Delegates the current device info lookup to DeviceManager
+    std::optional<RtAudio::DeviceInfo> AudioEngine::currentDeviceInfo() const
     {
-        // Iterate through all available devices
-        std::vector<unsigned int> ids = m_audio->getDeviceIds();
-        for (unsigned int id : ids)
-        {
-            RtAudio::DeviceInfo info = m_audio->getDeviceInfo(id);
-
-            // Check if the device has output channels
-            if (info.outputChannels > 0)
-            {
-                return id;
-            }
-        }
-
-        // No usable output device found
-        return std::nullopt;
-    }
-
-    RtAudio::DeviceInfo AudioEngine::getDeviceInfo(unsigned int id) const
-    {
-        // Return the device info for a given device ID
-        return m_audio->getDeviceInfo(id);
-    }
-
-    RtAudio::DeviceInfo dtracker::engine::AudioEngine::currentDeviceInfo() const
-    {
-        return m_currentDeviceInfo;
+        return m_deviceManager.currentDeviceInfo();
     }
 
 } // namespace dtracker::engine
