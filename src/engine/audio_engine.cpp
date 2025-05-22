@@ -143,6 +143,7 @@ namespace dtracker::engine
             return false;
         }
 
+        std::cout << "AudioEngine: Stream successfully started\n";
         return true;
     }
 
