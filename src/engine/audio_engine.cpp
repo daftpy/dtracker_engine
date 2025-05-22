@@ -69,6 +69,25 @@ namespace dtracker::engine
     {
         if (!m_started)
             return;
+
+        if (m_audio->isStreamRunning())
+        {
+            auto err = m_audio->stopStream();
+            if (err != RTAUDIO_NO_ERROR)
+            {
+                std::cerr << "AudioEngine: Failed to stop stream ("
+                          << static_cast<int>(err)
+                          << "): " << m_audio->getErrorText() << "\n";
+            }
+        }
+
+        if (m_audio->isStreamOpen())
+        {
+            // No return value — errors will go through error callback
+            m_audio->closeStream();
+        }
+
+        m_started = false;
         std::cout << "AudioEngine: Engine stopped\n";
     }
 

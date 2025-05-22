@@ -12,6 +12,17 @@ TEST(AudioEngine, StartsSuccessfully)
     EXPECT_TRUE(engine.isStreamRunning()) << "Stream stopped running";
 }
 
+TEST(AudioEngine, StopsAndClosesSteam)
+{
+    dtracker::engine::AudioEngine engine;
+    ASSERT_TRUE(engine.start());
+
+    engine.stop();
+
+    EXPECT_FALSE(engine.isStreamRunning()) << "Stream should be stopped";
+    EXPECT_FALSE(engine.isStreamOpen()) << "Stream should be closed";
+}
+
 TEST(AudioEngineDeviceTest, DeviceInfoHasOutputChannels)
 {
     dtracker::engine::AudioEngine engine;
