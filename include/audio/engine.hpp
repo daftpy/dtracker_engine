@@ -26,6 +26,7 @@ namespace dtracker::audio
         bool isStreamRunning() const;
 
         void setOutputDevice(unsigned int deviceId);
+        void setPlaybackUnit(std::unique_ptr<playback::PlaybackUnit> unit);
 
         DeviceManager createDeviceManager() const;
 

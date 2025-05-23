@@ -39,6 +39,7 @@ FetchContent_MakeAvailable(RtAudio)
 add_library(dtracker_engine STATIC
     src/audio/engine.cpp
     src/audio/device_manager.cpp
+    src/audio/playback_manager.cpp
     src/audio/playback/tone_playback.cpp
 )
 

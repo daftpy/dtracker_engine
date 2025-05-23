@@ -56,9 +56,11 @@ namespace dtracker::audio
             return false;
         }
 
-        // Initialize playback unit
-        m_currentPlayback = std::make_unique<playback::TonePlayback>(
-            static_cast<float>(m_settings.sampleRate));
+        if (!m_currentPlayback)
+        {
+            std::cerr << "AudioEngine: No playback unit set\n";
+            return false;
+        }
 
         const bool success = openStream(*m_selectedDeviceId);
         if (success)
@@ -149,6 +151,11 @@ namespace dtracker::audio
     void Engine::setOutputDevice(unsigned int deviceId)
     {
         m_selectedDeviceId = deviceId;
+    }
+
+    void Engine::setPlaybackUnit(std::unique_ptr<playback::PlaybackUnit> unit)
+    {
+        m_currentPlayback = std::move(unit);
     }
 
     DeviceManager Engine::createDeviceManager() const
