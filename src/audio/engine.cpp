@@ -32,8 +32,7 @@ namespace dtracker::audio
     }
 
     // Sets up RtAudio and the device manager
-    Engine::Engine()
-        : m_audio(std::make_unique<RtAudio>()), m_deviceManager(m_audio.get())
+    Engine::Engine() : m_audio(std::make_unique<RtAudio>())
     {
         std::cout << "AudioEngine: Initialized\n";
 
@@ -51,27 +50,20 @@ namespace dtracker::audio
     {
         std::cout << "AudioEngine: Starting...\n";
 
-        auto currentDeviceInfo = m_deviceManager.currentDeviceInfo();
-        if (currentDeviceInfo.has_value())
+        if (!m_selectedDeviceId.has_value())
         {
-            auto &info = currentDeviceInfo.value();
-            m_started = true;
-
-            std::cout << "Using device: " << info.name << " (" << info.ID
-                      << ")\n";
-            std::cout << "Output channels: " << info.outputChannels << "\n";
-
-            // Set up playback unit (sine tone for now)
-            m_currentPlayback =
-                std::make_unique<playback::TonePlayback>(static_cast<float>(
-                    m_settings.sampleRate)); // Cast sampleRate to float for DSP
-                                             // calculations
-
-            return openAndStartStream(info.ID);
+            std::cerr << "AudioEngine: No output device set\n";
+            return false;
         }
 
-        std::cerr << "AudioEngine: No valid output device found\n";
-        return false;
+        // Initialize playback unit
+        m_currentPlayback = std::make_unique<playback::TonePlayback>(
+            static_cast<float>(m_settings.sampleRate));
+
+        const bool success = openStream(*m_selectedDeviceId);
+        if (success)
+            m_started = true;
+        return success;
     }
 
     // Stop and close the active audio stream
@@ -104,7 +96,7 @@ namespace dtracker::audio
     }
 
     // Opens and starts the audio stream with the provided output device ID
-    bool Engine::openAndStartStream(unsigned int deviceId)
+    bool Engine::openStream(unsigned int deviceId)
     {
         RtAudio::StreamParameters outputParams;
         outputParams.deviceId = deviceId;
@@ -149,9 +141,22 @@ namespace dtracker::audio
     }
 
     // Returns the current active output device info, if available
-    std::optional<RtAudio::DeviceInfo> Engine::currentDeviceInfo() const
+    std::optional<unsigned int> Engine::currentDeviceId() const
     {
-        return m_deviceManager.currentDeviceInfo();
+        return m_selectedDeviceId;
+    }
+
+    void Engine::setOutputDevice(unsigned int deviceId)
+    {
+        m_selectedDeviceId = deviceId;
+    }
+
+    DeviceManager Engine::createDeviceManager() const
+    {
+        if (!m_audio)
+            throw std::runtime_error(
+                "Cannot create DeviceManager: m_audio is null");
+        return DeviceManager(m_audio.get());
     }
 
 } // namespace dtracker::audio

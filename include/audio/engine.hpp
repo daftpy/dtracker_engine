@@ -19,11 +19,15 @@ namespace dtracker::audio
         bool start();
         void stop();
 
-        std::optional<RtAudio::DeviceInfo> currentDeviceInfo() const;
+        std::optional<unsigned int> currentDeviceId() const;
 
-        bool openAndStartStream(unsigned int deviceId);
+        bool openStream(unsigned int deviceId);
         bool isStreamOpen() const;
         bool isStreamRunning() const;
+
+        void setOutputDevice(unsigned int deviceId);
+
+        DeviceManager createDeviceManager() const;
 
         // vars
         bool m_started{false};
@@ -32,8 +36,8 @@ namespace dtracker::audio
         // vars
         std::unique_ptr<RtAudio> m_audio;
         audio::types::AudioSettings m_settings;
+        std::optional<unsigned int> m_selectedDeviceId;
 
-        DeviceManager m_deviceManager;
         std::unique_ptr<playback::PlaybackUnit> m_currentPlayback;
     };
 } // namespace dtracker::audio
