@@ -1,9 +1,10 @@
 #pragma once
 #include <RtAudio.h>
 
-#include "audio/types/audio_settings.hpp"
-#include "audio/types/waves/sine_wav.hpp"
 #include "device_manager.hpp"
+#include "playback/playback_unit.hpp"
+#include "types/audio_settings.hpp"
+#include "types/waves/sine_wav.hpp"
 #include <memory>
 #include <optional>
 
@@ -33,6 +34,6 @@ namespace dtracker::audio
         audio::types::AudioSettings m_settings;
 
         DeviceManager m_deviceManager;
-        std::unique_ptr<audio::types::waves::SineWave> m_sine;
+        std::unique_ptr<playback::PlaybackUnit> m_currentPlayback;
     };
 } // namespace dtracker::audio
