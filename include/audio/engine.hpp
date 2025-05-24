@@ -3,6 +3,7 @@
 
 #include "device_manager.hpp"
 #include "playback/playback_unit.hpp"
+#include "playback/proxy_playback_unit.hpp"
 #include "types/audio_settings.hpp"
 #include "types/waves/sine_wav.hpp"
 #include <memory>
@@ -27,6 +28,7 @@ namespace dtracker::audio
 
         void setOutputDevice(unsigned int deviceId);
         void setPlaybackUnit(std::unique_ptr<playback::PlaybackUnit> unit);
+        playback::ProxyPlaybackUnit *proxyPlaybackUnit() const;
 
         DeviceManager createDeviceManager() const;
 
@@ -40,5 +42,6 @@ namespace dtracker::audio
         std::optional<unsigned int> m_selectedDeviceId;
 
         std::unique_ptr<playback::PlaybackUnit> m_currentPlayback;
+        std::unique_ptr<playback::ProxyPlaybackUnit> m_proxyUnit;
     };
 } // namespace dtracker::audio

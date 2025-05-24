@@ -19,24 +19,31 @@ namespace dtracker::audio
         if (status)
             std::cerr << "Stream underflow/overflow detected!\n";
 
-        auto *unit = static_cast<playback::PlaybackUnit *>(userData);
         float *buffer = static_cast<float *>(outputBuffer);
-
-        constexpr unsigned int channels = 2; // Hardcoded stereo output
+        constexpr unsigned int channels = 2;
         std::memset(buffer, 0,
-                    sizeof(float) * nFrames * channels); // Clear the buffer
+                    sizeof(float) * nFrames * channels); // Always clear
 
-        unit->render(buffer, nFrames, channels); // Render audio into the buffer
+        // Only attempt rendering if a valid unit is provided
+        if (auto *unit = static_cast<playback::PlaybackUnit *>(userData))
+        {
+            unit->render(buffer, nFrames, channels);
+        }
+        else
+        {
+            std::cerr << "AudioEngine: No playback unit provided to callback\n";
+        }
 
         return 0;
     }
 
     // Sets up RtAudio and the device manager
-    Engine::Engine() : m_audio(std::make_unique<RtAudio>())
+    Engine::Engine()
+        : m_audio(std::make_unique<RtAudio>()),
+          m_proxyUnit(std::make_unique<playback::ProxyPlaybackUnit>())
     {
         std::cout << "AudioEngine: Initialized\n";
 
-        // Register error callback with RtAudio
         m_audio->setErrorCallback(
             [](RtAudioErrorType type, const std::string &errorText)
             {
@@ -50,18 +57,14 @@ namespace dtracker::audio
     {
         std::cout << "AudioEngine: Starting...\n";
 
+        // If no valid audio device, do not start
         if (!m_selectedDeviceId.has_value())
         {
             std::cerr << "AudioEngine: No output device set\n";
             return false;
         }
 
-        if (!m_currentPlayback)
-        {
-            std::cerr << "AudioEngine: No playback unit set\n";
-            return false;
-        }
-
+        // Set started if the stream open succesfully
         const bool success = openStream(*m_selectedDeviceId);
         if (success)
             m_started = true;
@@ -105,10 +108,10 @@ namespace dtracker::audio
         outputParams.nChannels = m_settings.outputChannels;
         outputParams.firstChannel = 0;
 
-        // Bind playback unit to callback and open thee stream
+        // Bind playback proxy unit to callback and open the stream
         auto err = m_audio->openStream(
             &outputParams, nullptr, RTAUDIO_FLOAT32, m_settings.sampleRate,
-            &m_settings.bufferFrames, &audioCallback, m_currentPlayback.get());
+            &m_settings.bufferFrames, &audioCallback, m_proxyUnit.get());
 
         if (err != RTAUDIO_NO_ERROR)
         {
@@ -148,22 +151,34 @@ namespace dtracker::audio
         return m_selectedDeviceId;
     }
 
+    // Set the output device
     void Engine::setOutputDevice(unsigned int deviceId)
     {
         m_selectedDeviceId = deviceId;
     }
 
+    // Set's the delegate PlaybackUnit inside the ProxyPlaybackUnit pointer
     void Engine::setPlaybackUnit(std::unique_ptr<playback::PlaybackUnit> unit)
     {
         m_currentPlayback = std::move(unit);
+        if (m_proxyUnit)
+            m_proxyUnit->setDelegate(m_currentPlayback.get());
     }
 
+    // Creates a device manager with a reference to the internal RtAudio
+    // instance
     DeviceManager Engine::createDeviceManager() const
     {
         if (!m_audio)
             throw std::runtime_error(
                 "Cannot create DeviceManager: m_audio is null");
         return DeviceManager(m_audio.get());
+    }
+
+    // Get a const pointer to the proxyPlaybackUnit
+    playback::ProxyPlaybackUnit *Engine::proxyPlaybackUnit() const
+    {
+        return m_proxyUnit.get();
     }
 
 } // namespace dtracker::audio

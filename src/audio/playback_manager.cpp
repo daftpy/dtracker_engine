@@ -2,7 +2,6 @@
 
 #include "audio/playback/tone_playback.hpp"
 
-
 namespace dtracker::audio
 {
     // Initializes PlaybackManager with an Engine pointer
@@ -19,19 +18,21 @@ namespace dtracker::audio
 
         // Provide the unit to the engine and start playback
         m_engine->setPlaybackUnit(std::move(tone));
-        m_engine->start();
     }
 
     // Stops playback by calling Engine's stop
     void PlaybackManager::stopPlayback()
     {
         if (m_engine)
-            m_engine->stop();
+            m_engine->setPlaybackUnit(
+                nullptr); // clears the delegate in the proxy
     }
 
     // Returns true if Engine is currently streaming audio
     bool PlaybackManager::isPlaying() const
     {
-        return m_engine && m_engine->isStreamRunning();
+        return m_engine && m_engine->isStreamRunning() &&
+               m_engine->proxyPlaybackUnit()->delegate() != nullptr;
     }
+
 } // namespace dtracker::audio

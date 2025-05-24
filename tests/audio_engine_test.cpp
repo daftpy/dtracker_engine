@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <audio/device_manager.hpp>
-#include <audio/engine.hpp>
-#include <audio/playback/tone_playback.hpp>
-#include <audio/playback_manager.hpp>
+#include "audio/device_manager.hpp"
+#include "audio/engine.hpp"
+#include "audio/playback/tone_playback.hpp"
+#include "audio/playback_manager.hpp"
+#include "mocks/mock_playback_unit.hpp"
 
 // -------------------------
 // AudioEngine Integration Tests
@@ -81,6 +82,8 @@ TEST(PlaybackManager, StartsTonePlayback)
     dtracker::audio::Engine engine;
     engine.setOutputDevice(infoOpt->ID);
 
+    engine.start();
+
     dtracker::audio::PlaybackManager pm(&engine);
     pm.playTestTone(220.0f); // A3
 
@@ -99,6 +102,8 @@ TEST(PlaybackManager, StopsPlayback)
     dtracker::audio::Engine engine;
     engine.setOutputDevice(infoOpt->ID);
 
+    engine.start();
+
     dtracker::audio::PlaybackManager pm(&engine);
     pm.playTestTone(); // Start playback first
     ASSERT_TRUE(pm.isPlaying());
@@ -107,6 +112,21 @@ TEST(PlaybackManager, StopsPlayback)
 
     EXPECT_FALSE(pm.isPlaying())
         << "PlaybackManager still reports playing after stop";
-    EXPECT_FALSE(engine.isStreamRunning())
-        << "Engine stream still running after stopPlayback";
+}
+
+// -------------------------
+// Playback Tests
+// -------------------------
+TEST(ProxyPlaybackUnit, DelegatesRenderCall)
+{
+    dtracker::audio::playback::ProxyPlaybackUnit proxy;
+
+    MockPlaybackUnit mock;
+    proxy.setDelegate(&mock);
+
+    float dummyBuffer[64] = {0};
+    proxy.render(dummyBuffer, 32, 2); // Render one block
+
+    EXPECT_EQ(mock.renderCallCount, 1)
+        << "ProxyPlaybackUnit did not forward render() call to delegate";
 }
