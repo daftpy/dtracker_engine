@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include engine headers
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # --- Optional testing support ---
 include(CTest)  # defines BUILD_TESTING and calls enable_testing()
@@ -42,6 +42,14 @@ add_library(dtracker_engine STATIC
     src/audio/playback_manager.cpp
     src/audio/playback/proxy_playback_unit.cpp
     src/audio/playback/tone_playback.cpp
+    src/audio/playback/sample_playback.cpp
+)
+
+target_include_directories(dtracker_engine
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>        # For consumers: #include <dtracker/audio/...>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/dtracker                  # For internal engine .cpp/.hpp: #include "audio/engine.hpp"
 )
 
 target_link_libraries(dtracker_engine PUBLIC rtaudio)

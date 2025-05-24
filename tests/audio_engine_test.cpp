@@ -1,10 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "audio/device_manager.hpp"
-#include "audio/engine.hpp"
-#include "audio/playback/tone_playback.hpp"
-#include "audio/playback_manager.hpp"
 #include "mocks/mock_playback_unit.hpp"
+#include <dtracker/audio/device_manager.hpp>
+#include <dtracker/audio/engine.hpp>
+#include <dtracker/audio/playback/tone_playback.hpp>
+#include <dtracker/audio/playback_manager.hpp>
+
 
 // -------------------------
 // AudioEngine Integration Tests

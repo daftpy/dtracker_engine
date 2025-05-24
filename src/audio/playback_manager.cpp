@@ -1,6 +1,6 @@
-#include "audio/playback_manager.hpp"
-
-#include "audio/playback/tone_playback.hpp"
+#include <dtracker/audio/playback/sample_playback.hpp>
+#include <dtracker/audio/playback/tone_playback.hpp>
+#include <dtracker/audio/playback_manager.hpp>
 
 namespace dtracker::audio
 {
@@ -18,6 +18,17 @@ namespace dtracker::audio
 
         // Provide the unit to the engine and start playback
         m_engine->setPlaybackUnit(std::move(tone));
+    }
+
+    void PlaybackManager::playSample(std::vector<float> pcmData,
+                                     unsigned int sampleRate)
+    {
+        if (!m_engine)
+            return;
+
+        auto sampleUnit = std::make_unique<playback::SamplePlayback>(
+            std::move(pcmData), sampleRate);
+        m_engine->setPlaybackUnit(std::move(sampleUnit));
     }
 
     // Stops playback by calling Engine's stop

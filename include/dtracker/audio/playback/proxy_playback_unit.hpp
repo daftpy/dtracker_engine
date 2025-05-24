@@ -1,7 +1,7 @@
 // proxy_playback_unit.hpp
 #pragma once
 
-#include "playback_unit.hpp"
+#include <dtracker/audio/playback/playback_unit.hpp>
 
 namespace dtracker::audio::playback
 {

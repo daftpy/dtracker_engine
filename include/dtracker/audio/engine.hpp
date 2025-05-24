@@ -1,11 +1,11 @@
 #pragma once
 #include <RtAudio.h>
 
-#include "device_manager.hpp"
-#include "playback/playback_unit.hpp"
-#include "playback/proxy_playback_unit.hpp"
-#include "types/audio_settings.hpp"
-#include "types/waves/sine_wav.hpp"
+#include <dtracker/audio/device_manager.hpp>
+#include <dtracker/audio/playback/playback_unit.hpp>
+#include <dtracker/audio/playback/proxy_playback_unit.hpp>
+#include <dtracker/audio/types/audio_settings.hpp>
+#include <dtracker/audio/types/waves/sine_wav.hpp>
 #include <memory>
 #include <optional>
 

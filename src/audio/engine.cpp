@@ -1,7 +1,7 @@
-#include "audio/engine.hpp"
-
-#include "audio/playback/tone_playback.hpp"
+#include <dtracker/audio/engine.hpp>
+#include <dtracker/audio/playback/tone_playback.hpp>
 #include <iostream>
+
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

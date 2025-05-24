@@ -1,7 +1,7 @@
 #pragma once
-#include "audio/types/waves/sine_wav.hpp"
-#include "playback_unit.hpp"
 #include <cmath>
+#include <dtracker/audio/playback/playback_unit.hpp>
+#include <dtracker/audio/types/waves/sine_wav.hpp>
 #include <memory>
 
 namespace dtracker::audio::playback

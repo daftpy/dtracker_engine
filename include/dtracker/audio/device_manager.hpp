@@ -1,8 +1,8 @@
 #pragma once
 #include <RtAudio.h>
 
-#include "audio/types/audio_settings.hpp"
-#include "audio/types/waves/sine_wav.hpp"
+#include <dtracker/audio/types/audio_settings.hpp>
+#include <dtracker/audio/types/waves/sine_wav.hpp>
 #include <memory>
 #include <optional>
 

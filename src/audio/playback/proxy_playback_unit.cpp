@@ -1,7 +1,7 @@
 // proxy_playback_unit.cpp
-#include "audio/playback/proxy_playback_unit.hpp"
-
 #include <algorithm>
+#include <dtracker/audio/playback/proxy_playback_unit.hpp>
+
 
 namespace dtracker::audio::playback
 {

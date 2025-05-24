@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine.hpp"
+#include <dtracker/audio/engine.hpp>
 #include <memory>
 
 namespace dtracker::audio
@@ -14,6 +14,8 @@ namespace dtracker::audio
 
         // Plays a test sine tone with the given frequency (default is 440Hz)
         void playTestTone(float freq = 440.0f);
+
+        void playSample(std::vector<float> pcmData, unsigned int sampleRate);
 
         // Stops current playback if active
         void stopPlayback();
