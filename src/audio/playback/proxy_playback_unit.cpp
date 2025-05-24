@@ -1,7 +1,7 @@
 // proxy_playback_unit.cpp
 #include <algorithm>
 #include <dtracker/audio/playback/proxy_playback_unit.hpp>
-
+#include <iostream>
 
 namespace dtracker::audio::playback
 {
@@ -38,6 +38,7 @@ namespace dtracker::audio::playback
     // Returns whether playback is finished. Returns true if no delegate
     bool ProxyPlaybackUnit::isFinished() const
     {
+        std::cout << "Checking if delegate is finished rendering\n";
         return m_delegate ? m_delegate->isFinished() : true;
     }
 

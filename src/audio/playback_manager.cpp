@@ -28,6 +28,7 @@ namespace dtracker::audio
 
         auto sampleUnit = std::make_unique<playback::SamplePlayback>(
             std::move(pcmData), sampleRate);
+        std::cout << "Playing sample\n";
         m_engine->setPlaybackUnit(std::move(sampleUnit));
     }
 

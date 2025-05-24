@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <dtracker/audio/playback/sample_playback.hpp>
-
+#include <iostream>
 
 namespace dtracker::audio::playback
 {
@@ -41,7 +41,13 @@ namespace dtracker::audio::playback
 
     bool SamplePlayback::isFinished() const
     {
-        return m_position >= m_samples.size();
+        const bool finished = m_position >= m_samples.size();
+        if (finished)
+        {
+            std::cout << "SamplePlayback: playback complete (" << m_position
+                      << " / " << m_samples.size() << " samples)" << std::endl;
+        }
+        return finished;
     }
 
 } // namespace dtracker::audio::playback
