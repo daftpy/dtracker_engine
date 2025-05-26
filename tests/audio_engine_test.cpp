@@ -5,7 +5,7 @@
 #include <dtracker/audio/engine.hpp>
 #include <dtracker/audio/playback/tone_playback.hpp>
 #include <dtracker/audio/playback_manager.hpp>
-
+#include <thread>
 
 // -------------------------
 // AudioEngine Integration Tests
@@ -130,4 +130,58 @@ TEST(ProxyPlaybackUnit, DelegatesRenderCall)
 
     EXPECT_EQ(mock.renderCallCount, 1)
         << "ProxyPlaybackUnit did not forward render() call to delegate";
+}
+
+TEST(ProxyPlaybackUnit, ThreadSafeDelegateAccess)
+{
+    dtracker::audio::playback::ProxyPlaybackUnit proxy;
+    MockPlaybackUnit mockA;
+    MockPlaybackUnit mockB;
+
+    // Writer thread: flip between two delegates
+    std::atomic<bool> done = false;
+    std::thread writer(
+        [&]
+        {
+            for (int i = 0; i < 1000; ++i)
+            {
+                proxy.setDelegate(i % 2 == 0 ? &mockA : &mockB);
+            }
+            done = true;
+        });
+
+    // Render repeatedly while delegate is changing
+    std::thread reader(
+        [&]
+        {
+            float dummy[128];
+            while (!done)
+            {
+                proxy.render(dummy, 64, 2);
+            }
+        });
+
+    writer.join();
+    reader.join();
+
+    // Ensure no crashes occurred
+    SUCCEED();
+}
+
+TEST(ProxyPlaybackUnit, NullDelegateRendersSilence)
+{
+    dtracker::audio::playback::ProxyPlaybackUnit proxy;
+
+    // Fill with non-zero so we can check
+    float buffer[64];
+    std::fill_n(buffer, 64, 1.0f);
+
+    // No delegate to zero the buffer
+    proxy.setDelegate(nullptr);
+
+    // 32 frames, 2 channels
+    proxy.render(buffer, 32, 2);
+
+    for (float sample : buffer)
+        EXPECT_EQ(sample, 0.0f) << "Expected silence from null delegate";
 }

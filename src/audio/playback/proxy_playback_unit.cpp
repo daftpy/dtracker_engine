@@ -6,40 +6,38 @@
 namespace dtracker::audio::playback
 {
 
-    // Delegates rendering to the attached playback unit, or fills silence if
-    // none is set
+    // Renders audio from the currently active playback unit.
+    // If no unit is set, fills the buffer with silence.
     void ProxyPlaybackUnit::render(float *buffer, unsigned int frames,
                                    unsigned int channels)
     {
-        if (m_delegate)
-        {
-            // Forward render call to the current delegate
-            m_delegate->render(buffer, frames, channels);
-        }
+        PlaybackUnit *unit = m_delegate.load(std::memory_order_acquire);
+        if (unit)
+            unit->render(buffer, frames, channels);
         else
-        {
-            // No delegate means silence/fill buffer with zeros
             std::fill(buffer, buffer + (frames * channels), 0.0f);
-        }
     }
 
-    // Sets the current delegate playback unit (non-owning)
+    // Atomically sets the current delegate playback unit.
+    // This can be safely called from another thread (Qt gui).
     void ProxyPlaybackUnit::setDelegate(PlaybackUnit *unit)
     {
-        m_delegate = unit;
+        m_delegate.store(unit, std::memory_order_release);
     }
 
-    // Returns the currently assigned delegate, or nullptr if none
+    // Atomically retrieves the current delegate playback unit.
+    // Intended for safe access on the audio thread.
     PlaybackUnit *ProxyPlaybackUnit::delegate() const
     {
-        return m_delegate;
+        return m_delegate.load(std::memory_order_acquire);
     }
 
-    // Returns whether playback is finished. Returns true if no delegate
+    // Returns true if playback is finished or if no delegate is set.
+    // Safe for real-time thread polling.
     bool ProxyPlaybackUnit::isFinished() const
     {
-        std::cout << "Checking if delegate is finished rendering\n";
-        return m_delegate ? m_delegate->isFinished() : true;
+        PlaybackUnit *unit = m_delegate.load(std::memory_order_acquire);
+        return unit ? unit->isFinished() : true;
     }
 
 } // namespace dtracker::audio::playback

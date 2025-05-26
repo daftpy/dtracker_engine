@@ -43,3 +43,6 @@ CTestTestfile.cmake
 
 # Ignore RtAudio and gtest fetched content
 /_deps/
+
+# Internal Docs
+**ROADMAP.md

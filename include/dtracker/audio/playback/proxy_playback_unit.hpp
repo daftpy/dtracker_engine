@@ -1,7 +1,8 @@
 // proxy_playback_unit.hpp
 #pragma once
-
+#include <atomic>
 #include <dtracker/audio/playback/playback_unit.hpp>
+
 
 namespace dtracker::audio::playback
 {
@@ -18,7 +19,7 @@ namespace dtracker::audio::playback
         bool isFinished() const;
 
       private:
-        PlaybackUnit *m_delegate{nullptr}; // Not owning
+        std::atomic<PlaybackUnit *> m_delegate{nullptr}; // Not owning
     };
 
 } // namespace dtracker::audio::playback
