@@ -2,7 +2,6 @@
 #include <dtracker/audio/playback/tone_playback.hpp>
 #include <iostream>
 
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -157,14 +156,6 @@ namespace dtracker::audio
         m_selectedDeviceId = deviceId;
     }
 
-    // Set's the delegate PlaybackUnit inside the ProxyPlaybackUnit pointer
-    void Engine::setPlaybackUnit(std::unique_ptr<playback::PlaybackUnit> unit)
-    {
-        m_currentPlayback = std::move(unit);
-        if (m_proxyUnit)
-            m_proxyUnit->setDelegate(m_currentPlayback.get());
-    }
-
     // Creates a device manager with a reference to the internal RtAudio
     // instance
     DeviceManager Engine::createDeviceManager() const
@@ -176,7 +167,7 @@ namespace dtracker::audio
     }
 
     // Get a const pointer to the proxyPlaybackUnit
-    playback::ProxyPlaybackUnit *Engine::proxyPlaybackUnit() const
+    playback::ProxyPlaybackUnit *Engine::proxyPlaybackUnit()
     {
         return m_proxyUnit.get();
     }

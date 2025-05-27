@@ -13,11 +13,10 @@ namespace dtracker::audio
         if (!m_engine)
             return;
 
-        // Create a new tone generator with specified frequency and sample rate
         auto tone = std::make_unique<playback::TonePlayback>(freq, 44100.0f);
 
-        // Provide the unit to the engine and start playback
-        m_engine->setPlaybackUnit(std::move(tone));
+        m_engine->proxyPlaybackUnit()->setDelegate(tone.get());
+        m_activeUnits.push_back(std::move(tone));
     }
 
     void PlaybackManager::playSample(std::vector<float> pcmData,
@@ -26,17 +25,19 @@ namespace dtracker::audio
         if (!m_engine)
             return;
 
-        auto sampleUnit = std::make_unique<playback::SamplePlayback>(
+        auto unit = std::make_unique<playback::SamplePlayback>(
             std::move(pcmData), sampleRate);
-        std::cout << "Playing sample\n";
-        m_engine->setPlaybackUnit(std::move(sampleUnit));
+        m_engine->proxyPlaybackUnit()->setDelegate(unit.get());
+        std::cout << "Playing sample\nVector Size: " << m_activeUnits.size()
+                  << "\n";
+        m_activeUnits.push_back(std::move(unit));
     }
 
     // Stops playback by calling Engine's stop
     void PlaybackManager::stopPlayback()
     {
         if (m_engine)
-            m_engine->setPlaybackUnit(
+            m_engine->proxyPlaybackUnit()->setDelegate(
                 nullptr); // clears the delegate in the proxy
     }
 

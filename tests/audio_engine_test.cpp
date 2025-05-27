@@ -39,11 +39,6 @@ TEST(AudioEngine, StopsAndClosesStream)
     dtracker::audio::Engine engine;
     engine.setOutputDevice(infoOpt->ID);
 
-    // Must be set for the engine to start
-    engine.setPlaybackUnit(
-        std::make_unique<dtracker::audio::playback::TonePlayback>(440.0f,
-                                                                  44100.0f));
-
     ASSERT_TRUE(engine.start()) << "Failed to start engine";
 
     engine.stop();

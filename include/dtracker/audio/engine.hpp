@@ -27,8 +27,7 @@ namespace dtracker::audio
         bool isStreamRunning() const;
 
         void setOutputDevice(unsigned int deviceId);
-        void setPlaybackUnit(std::unique_ptr<playback::PlaybackUnit> unit);
-        playback::ProxyPlaybackUnit *proxyPlaybackUnit() const;
+        playback::ProxyPlaybackUnit *proxyPlaybackUnit();
 
         DeviceManager createDeviceManager() const;
 
@@ -41,7 +40,6 @@ namespace dtracker::audio
         audio::types::AudioSettings m_settings;
         std::optional<unsigned int> m_selectedDeviceId;
 
-        std::unique_ptr<playback::PlaybackUnit> m_currentPlayback;
         std::unique_ptr<playback::ProxyPlaybackUnit> m_proxyUnit;
     };
 } // namespace dtracker::audio

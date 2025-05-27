@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dtracker/audio/engine.hpp>
+#include <dtracker/audio/playback/playback_unit.hpp>
 #include <memory>
 
 namespace dtracker::audio
@@ -25,5 +26,6 @@ namespace dtracker::audio
 
       private:
         Engine *m_engine{nullptr}; // Not owned
+        std::vector<std::unique_ptr<playback::PlaybackUnit>> m_activeUnits;
     };
 } // namespace dtracker::audio
