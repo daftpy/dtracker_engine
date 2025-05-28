@@ -5,6 +5,7 @@
 #include <dtracker/audio/engine.hpp>
 #include <dtracker/audio/playback/tone_playback.hpp>
 #include <dtracker/audio/playback_manager.hpp>
+#include <dtracker/audio/sample_manager.hpp>
 #include <thread>
 
 // -------------------------
@@ -80,7 +81,7 @@ TEST(PlaybackManager, StartsTonePlayback)
 
     engine.start();
 
-    dtracker::audio::PlaybackManager pm(&engine);
+    dtracker::audio::PlaybackManager pm(&engine, nullptr);
     pm.playTestTone(220.0f); // A3
 
     EXPECT_TRUE(pm.isPlaying()) << "PlaybackManager failed to start playback";
@@ -100,7 +101,7 @@ TEST(PlaybackManager, StopsPlayback)
 
     engine.start();
 
-    dtracker::audio::PlaybackManager pm(&engine);
+    dtracker::audio::PlaybackManager pm(&engine, nullptr);
     pm.playTestTone(); // Start playback first
     ASSERT_TRUE(pm.isPlaying());
 
@@ -179,4 +180,77 @@ TEST(ProxyPlaybackUnit, NullDelegateRendersSilence)
 
     for (float sample : buffer)
         EXPECT_EQ(sample, 0.0f) << "Expected silence from null delegate";
+}
+
+#include <gtest/gtest.h>
+
+#include <dtracker/audio/playback/sample_playback.hpp>
+#include <dtracker/audio/sample_manager.hpp>
+
+using namespace dtracker::audio;
+
+TEST(SampleManager, AddReturnsUniqueIds)
+{
+    SampleManager manager;
+    int id1 = manager.addSample({0.1f, 0.2f, 0.3f}, 44100);
+    int id2 = manager.addSample({0.4f, 0.5f}, 44100);
+    EXPECT_NE(id1, id2);
+}
+
+TEST(SampleManager, GetSampleReturnsCopy)
+{
+    SampleManager manager;
+    std::vector<float> pcm = {0.1f, 0.2f, 0.3f};
+    int id = manager.addSample(pcm, 44100);
+
+    auto sample1 = manager.getSample(id);
+    auto sample2 = manager.getSample(id);
+
+    EXPECT_NE(sample1.get(), sample2.get()); // Distinct objects
+    EXPECT_TRUE(sample1 != nullptr);
+    EXPECT_TRUE(sample2 != nullptr);
+
+    // Ensure deep copy by comparing internal data
+    auto *sp1 = dynamic_cast<playback::SamplePlayback *>(sample1.get());
+    auto *sp2 = dynamic_cast<playback::SamplePlayback *>(sample2.get());
+
+    ASSERT_NE(sp1, nullptr);
+    ASSERT_NE(sp2, nullptr);
+
+    EXPECT_EQ(sp1->sampleRate(), sp2->sampleRate());
+    EXPECT_EQ(sp1->data().size(), sp2->data().size());
+    EXPECT_EQ(sp1->data(), sp2->data());
+}
+
+TEST(SampleManager, GetSampleReturnsNullOnInvalidId)
+{
+    SampleManager manager;
+    auto sample = manager.getSample(999); // Never added
+    EXPECT_EQ(sample, nullptr);
+}
+
+TEST(SampleManager, RemoveSampleDeletesIt)
+{
+    SampleManager manager;
+    int id = manager.addSample({0.1f, 0.2f}, 44100);
+    EXPECT_TRUE(manager.removeSample(id));
+    EXPECT_FALSE(manager.removeSample(id)); // Already removed
+    EXPECT_EQ(manager.getSample(id), nullptr);
+}
+
+TEST(SampleManager, AllSampleIdsReflectsContents)
+{
+    SampleManager manager;
+    int id1 = manager.addSample({0.1f}, 44100);
+    int id2 = manager.addSample({0.2f}, 44100);
+
+    std::vector<int> ids = manager.allSampleIds();
+    EXPECT_EQ(ids.size(), 2);
+    EXPECT_NE(std::find(ids.begin(), ids.end(), id1), ids.end());
+    EXPECT_NE(std::find(ids.begin(), ids.end(), id2), ids.end());
+
+    manager.removeSample(id1);
+    ids = manager.allSampleIds();
+    EXPECT_EQ(ids.size(), 1);
+    EXPECT_EQ(ids[0], id2);
 }

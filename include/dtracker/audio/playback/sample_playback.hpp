@@ -16,6 +16,11 @@ namespace dtracker::audio::playback
                     unsigned int channels) override;
         bool isFinished() const override;
 
+        // Returns pcm Data
+        const std::vector<float> &data() const;
+
+        unsigned int sampleRate() const;
+
       private:
         std::vector<float> m_samples; // Interleaved stereo data (L R L R... )
         size_t m_position = 0;        // Current sample index (not byte index)

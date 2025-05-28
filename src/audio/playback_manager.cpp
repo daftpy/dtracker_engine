@@ -5,7 +5,11 @@
 namespace dtracker::audio
 {
     // Initializes PlaybackManager with an Engine pointer
-    PlaybackManager::PlaybackManager(Engine *engine) : m_engine(engine) {}
+    PlaybackManager::PlaybackManager(Engine *engine,
+                                     SampleManager *sampleManager)
+        : m_engine(engine), m_sampleManager(sampleManager)
+    {
+    }
 
     // Creates a sine tone playback unit and starts the engine
     void PlaybackManager::playTestTone(float freq)

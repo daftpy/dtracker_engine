@@ -40,6 +40,7 @@ add_library(dtracker_engine STATIC
     src/audio/engine.cpp
     src/audio/device_manager.cpp
     src/audio/playback_manager.cpp
+    src/audio/sample_manager.cpp
     src/audio/playback/proxy_playback_unit.cpp
     src/audio/playback/tone_playback.cpp
     src/audio/playback/sample_playback.cpp

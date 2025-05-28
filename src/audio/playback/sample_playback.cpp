@@ -50,4 +50,14 @@ namespace dtracker::audio::playback
         return finished;
     }
 
+    unsigned int SamplePlayback::sampleRate() const
+    {
+        return m_sampleRate;
+    }
+
+    const std::vector<float> &SamplePlayback::data() const
+    {
+        return m_samples;
+    }
+
 } // namespace dtracker::audio::playback
