@@ -37,6 +37,23 @@ namespace dtracker::audio
         m_activeUnits.push_back(std::move(unit));
     }
 
+    void PlaybackManager::playSampleById(int sampleId)
+    {
+        if (!m_engine || !m_sampleManager)
+            return;
+
+        auto unit = m_sampleManager->getSample(sampleId);
+        if (!unit)
+        {
+            std::cerr << "PlaybackManager: Sample ID " << sampleId
+                      << " not found\n";
+            return;
+        }
+
+        m_engine->proxyPlaybackUnit()->setDelegate(unit.get());
+        m_activeUnits.push_back(std::move(unit));
+    }
+
     // Stops playback by calling Engine's stop
     void PlaybackManager::stopPlayback()
     {

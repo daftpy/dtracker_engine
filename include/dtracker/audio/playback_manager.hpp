@@ -20,6 +20,9 @@ namespace dtracker::audio
         // Plays a sample with a given sample rate
         void playSample(std::vector<float> pcmData, unsigned int sampleRate);
 
+        // Plays a sample from the SampleManager by Id
+        void playSampleById(int sampleId);
+
         // Stops current playback if active
         void stopPlayback();
 
