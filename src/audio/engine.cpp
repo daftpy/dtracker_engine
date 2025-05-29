@@ -39,10 +39,12 @@ namespace dtracker::audio
     // Sets up RtAudio and the device manager
     Engine::Engine()
         : m_audio(std::make_unique<RtAudio>()),
-          m_proxyUnit(std::make_unique<playback::ProxyPlaybackUnit>())
+          m_proxyUnit(std::make_unique<playback::ProxyPlaybackUnit>()),
+          m_mixerUnit(std::make_unique<playback::MixerPlaybackUnit>())
     {
         std::cout << "AudioEngine: Initialized\n";
 
+        m_proxyUnit->setDelegate(m_mixerUnit.get());
         m_audio->setErrorCallback(
             [](RtAudioErrorType type, const std::string &errorText)
             {
@@ -170,6 +172,11 @@ namespace dtracker::audio
     playback::ProxyPlaybackUnit *Engine::proxyPlaybackUnit()
     {
         return m_proxyUnit.get();
+    }
+
+    playback::MixerPlaybackUnit *Engine::mixerUnit()
+    {
+        return m_mixerUnit.get();
     }
 
 } // namespace dtracker::audio

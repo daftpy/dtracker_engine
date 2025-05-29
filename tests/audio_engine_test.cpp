@@ -3,6 +3,7 @@
 #include "mocks/mock_playback_unit.hpp"
 #include <dtracker/audio/device_manager.hpp>
 #include <dtracker/audio/engine.hpp>
+#include <dtracker/audio/playback/sample_playback.hpp>
 #include <dtracker/audio/playback/tone_playback.hpp>
 #include <dtracker/audio/playback_manager.hpp>
 #include <dtracker/audio/sample_manager.hpp>
@@ -182,16 +183,9 @@ TEST(ProxyPlaybackUnit, NullDelegateRendersSilence)
         EXPECT_EQ(sample, 0.0f) << "Expected silence from null delegate";
 }
 
-#include <gtest/gtest.h>
-
-#include <dtracker/audio/playback/sample_playback.hpp>
-#include <dtracker/audio/sample_manager.hpp>
-
-using namespace dtracker::audio;
-
 TEST(SampleManager, AddReturnsUniqueIds)
 {
-    SampleManager manager;
+    dtracker::audio::SampleManager manager;
     int id1 = manager.addSample({0.1f, 0.2f, 0.3f}, 44100);
     int id2 = manager.addSample({0.4f, 0.5f}, 44100);
     EXPECT_NE(id1, id2);
@@ -199,7 +193,7 @@ TEST(SampleManager, AddReturnsUniqueIds)
 
 TEST(SampleManager, GetSampleReturnsCopy)
 {
-    SampleManager manager;
+    dtracker::audio::SampleManager manager;
     std::vector<float> pcm = {0.1f, 0.2f, 0.3f};
     int id = manager.addSample(pcm, 44100);
 
@@ -211,8 +205,10 @@ TEST(SampleManager, GetSampleReturnsCopy)
     EXPECT_TRUE(sample2 != nullptr);
 
     // Ensure deep copy by comparing internal data
-    auto *sp1 = dynamic_cast<playback::SamplePlayback *>(sample1.get());
-    auto *sp2 = dynamic_cast<playback::SamplePlayback *>(sample2.get());
+    auto *sp1 = dynamic_cast<dtracker::audio::playback::SamplePlayback *>(
+        sample1.get());
+    auto *sp2 = dynamic_cast<dtracker::audio::playback::SamplePlayback *>(
+        sample2.get());
 
     ASSERT_NE(sp1, nullptr);
     ASSERT_NE(sp2, nullptr);
@@ -224,14 +220,14 @@ TEST(SampleManager, GetSampleReturnsCopy)
 
 TEST(SampleManager, GetSampleReturnsNullOnInvalidId)
 {
-    SampleManager manager;
+    dtracker::audio::SampleManager manager;
     auto sample = manager.getSample(999); // Never added
     EXPECT_EQ(sample, nullptr);
 }
 
 TEST(SampleManager, RemoveSampleDeletesIt)
 {
-    SampleManager manager;
+    dtracker::audio::SampleManager manager;
     int id = manager.addSample({0.1f, 0.2f}, 44100);
     EXPECT_TRUE(manager.removeSample(id));
     EXPECT_FALSE(manager.removeSample(id)); // Already removed
@@ -240,7 +236,7 @@ TEST(SampleManager, RemoveSampleDeletesIt)
 
 TEST(SampleManager, AllSampleIdsReflectsContents)
 {
-    SampleManager manager;
+    dtracker::audio::SampleManager manager;
     int id1 = manager.addSample({0.1f}, 44100);
     int id2 = manager.addSample({0.2f}, 44100);
 
@@ -253,4 +249,53 @@ TEST(SampleManager, AllSampleIdsReflectsContents)
     ids = manager.allSampleIds();
     EXPECT_EQ(ids.size(), 1);
     EXPECT_EQ(ids[0], id2);
+}
+
+TEST(MixerPlaybackUnit, RendersSilenceWhenEmpty)
+{
+    dtracker::audio::playback::MixerPlaybackUnit mixer;
+
+    float buffer[64];
+    std::fill_n(buffer, 64, 1.0f); // Pre-fill with non-zero
+    mixer.render(buffer, 32, 2);   // 32 frames, 2 channels
+
+    for (float sample : buffer)
+    {
+        EXPECT_FLOAT_EQ(sample, 0.0f) << "Expected silence when empty";
+    }
+}
+
+TEST(MixerPlaybackUnit, MixesSingleUnitCorrectly)
+{
+    using namespace dtracker::audio::playback;
+
+    auto mock = std::make_unique<MockPlaybackUnit>();
+    mock->fillValue = 0.5f;
+    mock->renderCallCount = 1;
+
+    MixerPlaybackUnit mixer;
+    mixer.addUnit(std::move(mock));
+
+    float buffer[64];
+    mixer.render(buffer, 32, 2);
+
+    for (float sample : buffer)
+    {
+        EXPECT_FLOAT_EQ(sample, 0.5f);
+    }
+}
+
+TEST(MixerPlaybackUnit, RemovesFinishedUnits)
+{
+    auto mock = std::make_unique<MockPlaybackUnit>();
+    mock->fillValue = 0.1f;
+    mock->finishedAfterRender = true;
+
+    dtracker::audio::playback::MixerPlaybackUnit mixer;
+    mixer.addUnit(std::move(mock));
+
+    float buffer[64];
+    mixer.render(buffer, 32, 2); // First render, removes finished unit
+
+    EXPECT_TRUE(mixer.isFinished());
 }

@@ -39,19 +39,26 @@ namespace dtracker::audio
 
     void PlaybackManager::playSampleById(int sampleId)
     {
-        if (!m_engine || !m_sampleManager)
+        std::cout << "Playing sample by ID\n";
+        if (!m_sampleManager || !m_engine)
             return;
 
+        std::cout << "Retrieving sample by ID " << sampleId << "\n";
         auto unit = m_sampleManager->getSample(sampleId);
         if (!unit)
         {
-            std::cerr << "PlaybackManager: Sample ID " << sampleId
-                      << " not found\n";
+            std::cout << "No sample found\n";
+            return;
+        }
+        auto *mixer = m_engine->mixerUnit();
+        if (!mixer)
+        {
+            std::cout << "No mixer unit found\n";
             return;
         }
 
-        m_engine->proxyPlaybackUnit()->setDelegate(unit.get());
-        m_activeUnits.push_back(std::move(unit));
+        std::cout << "Adding sample to mixer " << sampleId << "\n";
+        mixer->addUnit(std::move(unit));
     }
 
     // Stops playback by calling Engine's stop
