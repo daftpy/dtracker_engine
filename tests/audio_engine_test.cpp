@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 
 #include "mocks/mock_playback_unit.hpp"
+#include "mocks/mock_stereo_unit.hpp"
 #include <dtracker/audio/device_manager.hpp>
 #include <dtracker/audio/engine.hpp>
 #include <dtracker/audio/playback/sample_playback.hpp>
 #include <dtracker/audio/playback/tone_playback.hpp>
+#include <dtracker/audio/playback/track_playback_unit.hpp>
 #include <dtracker/audio/playback_manager.hpp>
 #include <dtracker/audio/sample_manager.hpp>
 #include <thread>
@@ -298,4 +300,78 @@ TEST(MixerPlaybackUnit, RemovesFinishedUnits)
     mixer.render(buffer, 32, 2); // First render, removes finished unit
 
     EXPECT_TRUE(mixer.isFinished());
+}
+
+// TrackPlaybackUnit Tests
+TEST(TrackPlaybackUnit, RendersSilenceWhenEmpty)
+{
+    dtracker::audio::playback::TrackPlaybackUnit track;
+
+    float buffer[64];
+    std::fill_n(buffer, 64, 1.0f); // Pre-fill to detect changes
+    track.render(buffer, 32, 2);   // 32 frames, 2 channels
+
+    for (float sample : buffer)
+        EXPECT_FLOAT_EQ(sample, 0.0f);
+}
+
+TEST(TrackPlaybackUnit, AppliesVolumeAndPanCorrectly)
+{
+    auto unit = std::make_unique<MockStereoUnit>();
+    unit->leftValue = 1.0f;
+    unit->rightValue = 1.0f;
+
+    dtracker::audio::playback::TrackPlaybackUnit track;
+    track.setVolume(0.5f); // Halve output
+    track.setPan(-1.0f);   // Full left
+
+    track.addSample(std::move(unit));
+
+    float buffer[64] = {};
+    track.render(buffer, 32, 2);
+
+    for (unsigned int i = 0; i < 32; ++i)
+    {
+        EXPECT_FLOAT_EQ(buffer[i * 2], 0.5f);     // Left
+        EXPECT_FLOAT_EQ(buffer[i * 2 + 1], 0.0f); // Right (panned away)
+    }
+}
+
+TEST(TrackPlaybackUnit, PanBiasesLeftOrRight)
+{
+    using namespace dtracker::audio::playback;
+
+    auto mockLeft = std::make_unique<MockPlaybackUnit>();
+    mockLeft->fillValue = 1.0f;
+
+    TrackPlaybackUnit trackLeft;
+    trackLeft.setVolume(1.0f);
+    trackLeft.setPan(-1.0f); // Fully left
+    trackLeft.addSample(std::move(mockLeft));
+
+    float leftBuffer[64] = {};
+    trackLeft.render(leftBuffer, 32, 2);
+
+    for (unsigned int i = 0; i < 64; i += 2)
+    {
+        EXPECT_FLOAT_EQ(leftBuffer[i], 1.0f);     // Left channel
+        EXPECT_FLOAT_EQ(leftBuffer[i + 1], 0.0f); // Right channel
+    }
+
+    auto mockRight = std::make_unique<MockPlaybackUnit>();
+    mockRight->fillValue = 1.0f;
+
+    TrackPlaybackUnit trackRight;
+    trackRight.setVolume(1.0f);
+    trackRight.setPan(1.0f); // Fully right
+    trackRight.addSample(std::move(mockRight));
+
+    float rightBuffer[64] = {};
+    trackRight.render(rightBuffer, 32, 2);
+
+    for (unsigned int i = 0; i < 64; i += 2)
+    {
+        EXPECT_FLOAT_EQ(rightBuffer[i], 0.0f);     // Left channel
+        EXPECT_FLOAT_EQ(rightBuffer[i + 1], 1.0f); // Right channel
+    }
 }

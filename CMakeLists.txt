@@ -45,6 +45,8 @@ add_library(dtracker_engine STATIC
     src/audio/playback/tone_playback.cpp
     src/audio/playback/sample_playback.cpp
     src/audio/playback/mixer_playback.cpp
+    src/audio/playback/track_playback_unit.cpp
+    src/tracker/track_manager.cpp
 )
 
 target_include_directories(dtracker_engine
