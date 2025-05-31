@@ -1,4 +1,4 @@
-#include <dtracker/audio/playback/sample_playback.hpp> // Needed to construct sample units
+#include <dtracker/audio/playback/sample_playback_unit.hpp> // Needed to construct sample units
 #include <dtracker/audio/sample_manager.hpp>
 #include <iostream>
 

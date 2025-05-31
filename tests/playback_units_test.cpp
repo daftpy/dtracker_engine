@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <dtracker/audio/playback/sample_playback.hpp>
+#include <dtracker/audio/playback/sample_playback_unit.hpp>
 
 TEST(SamplePlaybackTest, CompletesPlaybackAndResets)
 {

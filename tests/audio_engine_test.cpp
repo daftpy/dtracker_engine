@@ -4,7 +4,7 @@
 #include "mocks/mock_stereo_unit.hpp"
 #include <dtracker/audio/device_manager.hpp>
 #include <dtracker/audio/engine.hpp>
-#include <dtracker/audio/playback/sample_playback.hpp>
+#include <dtracker/audio/playback/sample_playback_unit.hpp>
 #include <dtracker/audio/playback/tone_playback.hpp>
 #include <dtracker/audio/playback/track_playback_unit.hpp>
 #include <dtracker/audio/playback_manager.hpp>
