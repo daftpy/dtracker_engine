@@ -26,7 +26,7 @@ namespace dtracker::tracker
 
             auto unit = m_sampleManager->getSample(id);
             if (unit)
-                track->addSample(std::move(unit));
+                track->addSample(unit);
         }
 
         // Store the track using a unique track ID
@@ -68,7 +68,7 @@ namespace dtracker::tracker
         {
             auto unit = m_sampleManager->getSample(id);
             if (unit)
-                track->addSample(std::move(unit));
+                track->addSample(unit);
         }
 
         return true;

@@ -7,9 +7,14 @@
 namespace dtracker::audio::playback
 {
 
-    void TrackPlaybackUnit::addSample(std::unique_ptr<PlaybackUnit> unit)
+    // void TrackPlaybackUnit::addSample(std::unique_ptr<PlaybackUnit> unit)
+    // {
+    //     m_units.push_back(std::move(unit));
+    // }
+
+    void TrackPlaybackUnit::addSample(PlaybackUnit *unit)
     {
-        m_units.push_back(std::move(unit));
+        m_units.push_back(unit);
     }
 
     void TrackPlaybackUnit::setVolume(float v)

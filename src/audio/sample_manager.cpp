@@ -22,22 +22,13 @@ namespace dtracker::audio
         return id;
     }
 
-    // Returns a copy of the sample PlaybackUnit, or nullptr if not found
-    std::unique_ptr<playback::PlaybackUnit>
-    SampleManager::getSample(int sampleId)
+    // Returns a raw pointer to the unique pointer in the manager
+    playback::PlaybackUnit *SampleManager::getSample(int sampleId)
     {
         auto it = m_samples.find(sampleId);
-        if (it == m_samples.end())
-            return nullptr;
-
-        // Copy the underlying SamplePlayback unit
-        auto *sample =
-            dynamic_cast<playback::SamplePlayback *>(it->second.get());
-        if (!sample)
-            return nullptr;
-
-        // Return a new instance with the same PCM data and sample rate
-        return std::make_unique<playback::SamplePlayback>(*sample);
+        if (it != m_samples.end())
+            return it->second.get();
+        return nullptr;
     }
 
     bool SampleManager::removeSample(int sampleId)

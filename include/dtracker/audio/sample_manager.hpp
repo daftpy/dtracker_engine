@@ -13,7 +13,8 @@ namespace dtracker::audio
         SampleManager() = default;
 
         int addSample(std::vector<float> pcm, unsigned int rate);
-        std::unique_ptr<playback::PlaybackUnit> getSample(int sampleId);
+
+        playback::PlaybackUnit *getSample(int sampleId);
         bool removeSample(int sampleId);
         std::vector<int> allSampleIds();
 

@@ -58,7 +58,7 @@ namespace dtracker::audio
         }
 
         std::cout << "Adding sample to mixer " << sampleId << "\n";
-        mixer->addUnit(std::move(unit));
+        mixer->addUnit(unit);
     }
 
     // Stops playback by calling Engine's stop
