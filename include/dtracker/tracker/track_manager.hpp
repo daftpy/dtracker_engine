@@ -21,6 +21,9 @@ namespace dtracker::tracker
         // Retrieves a raw pointer to a track by ID (or nullptr if not found)
         audio::playback::TrackPlaybackUnit *getTrack(int id);
 
+        // Adds one or more samples to an existing track by ID
+        bool addSamplesToTrack(int trackId, const std::vector<int> &sampleIds);
+
         // Optional: remove a track
         bool removeTrack(int id);
 

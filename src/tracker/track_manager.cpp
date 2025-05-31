@@ -54,6 +54,26 @@ namespace dtracker::tracker
         return (it != m_tracks.end()) ? it->second.get() : nullptr;
     }
 
+    // Adds a list of samples to a specified track
+    bool TrackManager::addSamplesToTrack(int trackId,
+                                         const std::vector<int> &sampleIds)
+    {
+        // Attempt to get the track
+        auto *track = getTrack(trackId);
+        if (!track || !m_sampleManager)
+            return false;
+
+        // Add the samples to the track if they exist
+        for (int id : sampleIds)
+        {
+            auto unit = m_sampleManager->getSample(id);
+            if (unit)
+                track->addSample(std::move(unit));
+        }
+
+        return true;
+    }
+
     // Removes a track by ID. Returns true if the track was removed, false if it
     // didn't exist.
     bool TrackManager::removeTrack(int id)

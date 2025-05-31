@@ -63,3 +63,17 @@ TEST(TrackManager, AllTrackIdsReflectsContents)
     EXPECT_NE(std::find(ids.begin(), ids.end(), a), ids.end());
     EXPECT_NE(std::find(ids.begin(), ids.end(), b), ids.end());
 }
+
+TEST(TrackManager, CanAddSamplesToExistingTrack)
+{
+    dtracker::audio::SampleManager sampleManager;
+    int s1 = sampleManager.addSample({0.1f, 0.2f}, 44100);
+    dtracker::tracker::TrackManager tm(&sampleManager);
+
+    int trackId = tm.createTrack();
+    EXPECT_TRUE(tm.addSamplesToTrack(trackId, {s1}));
+
+    auto *track = tm.getTrack(trackId);
+    ASSERT_NE(track, nullptr);
+    EXPECT_FALSE(track->isFinished()); // It now has one sample
+}
