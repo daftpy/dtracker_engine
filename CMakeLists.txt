@@ -43,7 +43,7 @@ add_library(dtracker_engine STATIC
     src/audio/sample_manager.cpp
     src/audio/playback/proxy_playback_unit.cpp
     src/audio/playback/tone_playback.cpp
-    src/audio/playback/sample_playback.cpp
+    src/audio/playback/sample_playback_unit.cpp
     src/audio/playback/mixer_playback.cpp
     src/audio/playback/track_playback_unit.cpp
     src/tracker/track_manager.cpp
