@@ -5,8 +5,8 @@
 namespace dtracker::audio::playback
 {
 
-    SamplePlayback::SamplePlayback(std::vector<float> samples,
-                                   unsigned int sampleRate)
+    SamplePlaybackUnit::SamplePlaybackUnit(std::vector<float> samples,
+                                           unsigned int sampleRate)
         : m_samples(std::move(samples)), m_sampleRate(sampleRate)
     {
         // Ensure the data is interleaved stereo (even number of floats)
@@ -14,8 +14,8 @@ namespace dtracker::audio::playback
             m_samples.push_back(0.0f); // Pad with silence if needed
     }
 
-    void SamplePlayback::render(float *buffer, unsigned int frames,
-                                unsigned int channels)
+    void SamplePlaybackUnit::render(float *buffer, unsigned int frames,
+                                    unsigned int channels)
     {
         if (channels != 2)
         {
@@ -39,7 +39,7 @@ namespace dtracker::audio::playback
         }
     }
 
-    bool SamplePlayback::isFinished() const
+    bool SamplePlaybackUnit::isFinished() const
     {
         const bool finished = m_position >= m_samples.size();
         if (finished)
@@ -50,12 +50,18 @@ namespace dtracker::audio::playback
         return finished;
     }
 
-    unsigned int SamplePlayback::sampleRate() const
+    void SamplePlaybackUnit::reset()
+    {
+        std::cout << "SamplePlayback: reset called\n";
+        m_position = 0;
+    }
+
+    unsigned int SamplePlaybackUnit::sampleRate() const
     {
         return m_sampleRate;
     }
 
-    const std::vector<float> &SamplePlayback::data() const
+    const std::vector<float> &SamplePlaybackUnit::data() const
     {
         return m_samples;
     }

@@ -9,8 +9,8 @@ namespace dtracker::audio
     {
         // Create a new SamplePlayback unit with the provided PCM and sample
         // rate
-        auto unit =
-            std::make_unique<playback::SamplePlayback>(std::move(pcm), rate);
+        auto unit = std::make_unique<playback::SamplePlaybackUnit>(
+            std::move(pcm), rate);
 
         // Store it in the map with a unique ID
         int id = m_nextId++;
@@ -33,8 +33,10 @@ namespace dtracker::audio
 
     bool SampleManager::removeSample(int sampleId)
     {
-        // Try to erase the sample by ID; returns true if it existed
-        return m_samples.erase(sampleId) > 0;
+        bool erased = m_samples.erase(sampleId) > 0;
+        std::cout << "SampleManager: removeSample(" << sampleId << ") -> "
+                  << (erased ? "success" : "not found") << "\n";
+        return erased;
     }
 
     std::vector<int> SampleManager::allSampleIds()

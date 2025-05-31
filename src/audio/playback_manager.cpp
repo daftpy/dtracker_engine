@@ -29,7 +29,7 @@ namespace dtracker::audio
         if (!m_engine)
             return;
 
-        auto unit = std::make_unique<playback::SamplePlayback>(
+        auto unit = std::make_unique<playback::SamplePlaybackUnit>(
             std::move(pcmData), sampleRate);
         m_engine->proxyPlaybackUnit()->setDelegate(unit.get());
         std::cout << "Playing sample\nVector Size: " << m_activeUnits.size()

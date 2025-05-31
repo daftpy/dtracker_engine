@@ -6,15 +6,17 @@
 namespace dtracker::audio::playback
 {
 
-    class SamplePlayback : public PlaybackUnit
+    class SamplePlaybackUnit : public PlaybackUnit
     {
       public:
         // Playback class from interleaved PCM float data
-        SamplePlayback(std::vector<float> samples, unsigned int sampleRate);
+        SamplePlaybackUnit(std::vector<float> samples, unsigned int sampleRate);
 
         void render(float *buffer, unsigned int frames,
                     unsigned int channels) override;
         bool isFinished() const override;
+
+        void reset(); // Resets playback to the beginning
 
         // Returns pcm Data
         const std::vector<float> &data() const;
