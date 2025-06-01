@@ -30,6 +30,8 @@ namespace dtracker::audio::playback
         virtual void render(float *output, unsigned int nFrames,
                             unsigned int channels) = 0;
 
+        virtual void reset() = 0;
+
         /**
          * Indicates whether playback has finished.
          *

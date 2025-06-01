@@ -4,7 +4,6 @@
 #include <dtracker/audio/playback/playback_unit.hpp>
 #include <vector>
 
-
 class MockStereoUnit : public dtracker::audio::playback::PlaybackUnit
 {
   public:
@@ -21,6 +20,11 @@ class MockStereoUnit : public dtracker::audio::playback::PlaybackUnit
             buffer[i * 2 + 1] = rightValue;
         }
         rendered = true;
+    }
+
+    void reset() override
+    {
+        rendered = false;
     }
 
     bool isFinished() const override

@@ -50,6 +50,8 @@ namespace dtracker::audio
             std::cout << "No sample found\n";
             return;
         }
+        unit->reset();
+
         auto *mixer = m_engine->mixerUnit();
         if (!mixer)
         {

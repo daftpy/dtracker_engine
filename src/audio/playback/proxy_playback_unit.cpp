@@ -32,6 +32,14 @@ namespace dtracker::audio::playback
         return m_delegate.load(std::memory_order_acquire);
     }
 
+    void ProxyPlaybackUnit::reset()
+    {
+        if (auto *unit = m_delegate.load(std::memory_order_acquire))
+        {
+            unit->reset();
+        }
+    }
+
     // Returns true if playback is finished or if no delegate is set.
     // Safe for real-time thread polling.
     bool ProxyPlaybackUnit::isFinished() const

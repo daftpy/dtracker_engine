@@ -20,6 +20,10 @@ namespace dtracker::audio::playback
         void render(float *buffer, unsigned int nFrames,
                     unsigned int channels) override;
 
+        void reset() override;
+
+        void clear();
+
         // Returns true if no active units remain (i.e. playback is silent)
         bool isFinished() const override;
 

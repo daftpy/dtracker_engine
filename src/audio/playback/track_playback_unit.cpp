@@ -58,16 +58,32 @@ namespace dtracker::audio::playback
                 buffer[i * 2 + 1] += temp[i * 2 + 1] * rightGain;
             }
 
-            if ((*it)->isFinished())
-                it = m_units.erase(it);
-            else
-                ++it;
+            // Stop erasing units for now
+            // if ((*it)->isFinished())
+            //     it = m_units.erase(it);
+            // else
+            ++it;
         }
+    }
+
+    void TrackPlaybackUnit::reset()
+    {
+        for (auto *unit : m_units)
+            if (unit)
+                unit->reset();
     }
 
     bool TrackPlaybackUnit::isFinished() const
     {
-        return m_units.empty();
+        return std::all_of(m_units.begin(), m_units.end(),
+                           [](PlaybackUnit *unit)
+                           { return unit && unit->isFinished(); });
     }
+
+    // Only works properly when erasing units after playback
+    // bool TrackPlaybackUnit::isFinished() const
+    // {
+    //     return m_units.empty();
+    // }
 
 } // namespace dtracker::audio::playback

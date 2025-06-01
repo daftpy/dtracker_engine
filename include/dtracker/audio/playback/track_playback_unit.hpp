@@ -16,6 +16,8 @@ namespace dtracker::audio::playback
 
         void render(float *buffer, unsigned int nFrames,
                     unsigned int channels) override;
+
+        void reset() override;
         bool isFinished() const override;
 
       private:

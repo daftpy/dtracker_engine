@@ -4,7 +4,6 @@
 #include <dtracker/audio/playback/playback_unit.hpp>
 #include <vector>
 
-
 class MockPlaybackUnit : public dtracker::audio::playback::PlaybackUnit
 {
   public:
@@ -18,6 +17,12 @@ class MockPlaybackUnit : public dtracker::audio::playback::PlaybackUnit
         renderCallCount++;
         std::fill(buffer, buffer + frames * channels, fillValue);
         hasRendered = true;
+    }
+
+    void reset() override
+    {
+        hasRendered = false;
+        renderCallCount = 0;
     }
 
     bool isFinished() const override

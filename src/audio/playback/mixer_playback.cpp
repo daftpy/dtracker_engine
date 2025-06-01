@@ -34,13 +34,28 @@ namespace dtracker::audio::playback
             if ((*it)->isFinished())
             {
                 std::cout << "MixerPlaybackUnit: "
-                          << "sample finished, erasing\n";
+                          << "tracks finished, erasing\n";
                 it = m_units.erase(it);
             }
             else
             {
                 ++it;
             }
+        }
+    }
+
+    void MixerPlaybackUnit::clear()
+    {
+        m_units.clear();
+    }
+
+    void MixerPlaybackUnit::reset()
+    {
+        std::cout << "MixerPlaybackUnit: resetting all contained units\n";
+
+        for (auto *unit : m_units)
+        {
+            unit->reset();
         }
     }
 

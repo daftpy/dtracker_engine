@@ -47,6 +47,12 @@ namespace dtracker::audio::playback
         }
     }
 
+    void TonePlayback::reset()
+    {
+        // Nothing
+        return;
+    }
+
     // Always returns false for now; playback is continuous
     bool TonePlayback::isFinished() const
     {

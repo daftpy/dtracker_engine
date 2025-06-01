@@ -16,7 +16,7 @@ namespace dtracker::audio::playback
                     unsigned int channels) override;
         bool isFinished() const override;
 
-        void reset(); // Resets playback to the beginning
+        void reset() override; // Resets playback to the beginning
 
         // Returns pcm Data
         const std::vector<float> &data() const;

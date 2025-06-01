@@ -3,7 +3,6 @@
 #include <atomic>
 #include <dtracker/audio/playback/playback_unit.hpp>
 
-
 namespace dtracker::audio::playback
 {
 
@@ -16,6 +15,7 @@ namespace dtracker::audio::playback
         void setDelegate(PlaybackUnit *unit);
         PlaybackUnit *delegate() const;
 
+        void reset() override;
         bool isFinished() const;
 
       private:
