@@ -29,8 +29,11 @@ namespace dtracker::audio
         if (!m_engine)
             return;
 
-        auto unit = std::make_unique<playback::SamplePlaybackUnit>(
-            std::move(pcmData), sampleRate);
+        // auto unit = std::make_unique<playback::SamplePlaybackUnit>(
+        //     std::move(pcmData), sampleRate);
+        auto sharedSample =
+            std::make_shared<SampleData>(std::move(pcmData), sampleRate);
+        auto unit = playback::makePlaybackUnit(sharedSample);
         m_engine->proxyPlaybackUnit()->setDelegate(unit.get());
         std::cout << "Playing sample\nVector Size: " << m_activeUnits.size()
                   << "\n";
@@ -44,7 +47,9 @@ namespace dtracker::audio
             return;
 
         std::cout << "Retrieving sample by ID " << sampleId << "\n";
-        auto unit = m_sampleManager->getSample(sampleId);
+        // auto unit = m_sampleManager->getSample(sampleId);
+        auto data = m_sampleManager->getSampleData(sampleId);
+        auto unit = playback::makePlaybackUnit(data);
         if (!unit)
         {
             std::cout << "No sample found\n";
@@ -60,7 +65,7 @@ namespace dtracker::audio
         }
 
         std::cout << "Adding sample to mixer " << sampleId << "\n";
-        mixer->addUnit(unit);
+        mixer->addUnit(std::move(unit));
     }
 
     // Stops playback by calling Engine's stop

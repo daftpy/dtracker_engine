@@ -7,14 +7,10 @@
 namespace dtracker::audio::playback
 {
 
-    // void TrackPlaybackUnit::addSample(std::unique_ptr<PlaybackUnit> unit)
-    // {
-    //     m_units.push_back(std::move(unit));
-    // }
-
-    void TrackPlaybackUnit::addSample(PlaybackUnit *unit)
+    void TrackPlaybackUnit::addSample(std::unique_ptr<PlaybackUnit> unit)
     {
-        m_units.push_back(unit);
+        if (unit)
+            m_units.push_back(std::move(unit));
     }
 
     void TrackPlaybackUnit::setVolume(float v)
@@ -58,7 +54,7 @@ namespace dtracker::audio::playback
                 buffer[i * 2 + 1] += temp[i * 2 + 1] * rightGain;
             }
 
-            // Stop erasing units for now
+            // If the unit is finished, remove it from the list
             // if ((*it)->isFinished())
             //     it = m_units.erase(it);
             // else
@@ -68,7 +64,7 @@ namespace dtracker::audio::playback
 
     void TrackPlaybackUnit::reset()
     {
-        for (auto *unit : m_units)
+        for (auto &unit : m_units)
             if (unit)
                 unit->reset();
     }
@@ -76,14 +72,8 @@ namespace dtracker::audio::playback
     bool TrackPlaybackUnit::isFinished() const
     {
         return std::all_of(m_units.begin(), m_units.end(),
-                           [](PlaybackUnit *unit)
+                           [](const std::unique_ptr<PlaybackUnit> &unit)
                            { return unit && unit->isFinished(); });
     }
-
-    // Only works properly when erasing units after playback
-    // bool TrackPlaybackUnit::isFinished() const
-    // {
-    //     return m_units.empty();
-    // }
 
 } // namespace dtracker::audio::playback

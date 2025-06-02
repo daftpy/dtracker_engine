@@ -1,32 +1,60 @@
 #pragma once
 
 #include <dtracker/audio/playback/playback_unit.hpp>
+#include <dtracker/audio/sample_data.hpp>
+#include <memory>
 #include <vector>
 
 namespace dtracker::audio::playback
 {
-
+    /**
+     * SamplePlaybackUnit plays back audio from a shared SampleData buffer.
+     * It is safe to have multiple units reading the same SampleData in
+     * parallel.
+     */
     class SamplePlaybackUnit : public PlaybackUnit
     {
       public:
-        // Playback class from interleaved PCM float data
-        SamplePlaybackUnit(std::vector<float> samples, unsigned int sampleRate);
+        /**
+         * Constructs a SamplePlaybackUnit using a shared SampleData buffer.
+         * The data is assumed to be stereo interleaved and even-length.
+         */
+        explicit SamplePlaybackUnit(std::shared_ptr<const SampleData> data);
 
+        /**
+         * Renders audio from the sample buffer into the output buffer.
+         * Will mix or write into the output depending on remaining data.
+         */
         void render(float *buffer, unsigned int frames,
                     unsigned int channels) override;
+
+        /**
+         * Returns true if all samples have been played back.
+         */
         bool isFinished() const override;
 
-        void reset() override; // Resets playback to the beginning
+        /**
+         * Resets playback to the beginning of the sample.
+         */
+        void reset() override;
 
-        // Returns pcm Data
+        /**
+         * Returns a read-only reference to the sample data buffer.
+         */
         const std::vector<float> &data() const;
 
+        /**
+         * Returns the sample rate associated with this sample.
+         */
         unsigned int sampleRate() const;
 
       private:
-        std::vector<float> m_samples; // Interleaved stereo data (L R L R... )
-        size_t m_position = 0;        // Current sample index (not byte index)
-        unsigned int m_sampleRate;    // For timing conversions
+        std::shared_ptr<const SampleData>
+            m_data;            // Shared backing sample buffer
+        size_t m_position = 0; // Current playback position (sample index)
     };
+
+    std::unique_ptr<SamplePlaybackUnit>
+    makePlaybackUnit(std::shared_ptr<const dtracker::audio::SampleData> data);
 
 } // namespace dtracker::audio::playback

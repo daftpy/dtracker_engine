@@ -86,23 +86,24 @@ TEST(ProxyPlaybackUnit, NullDelegateRendersSilence)
 TEST(SamplePlaybackTest, CompletesPlaybackAndResets)
 {
     std::vector<float> pcm(100, 0.5f); // 50 stereo frames (100 samples)
-    playback::SamplePlaybackUnit unit(pcm, 44100);
+    auto data = std::make_shared<SampleData>(std::move(pcm), 44100);
+    auto unit = playback::makePlaybackUnit(data);
 
     std::vector<float> buffer(100, 0.0f);
-    EXPECT_FALSE(unit.isFinished());
+    EXPECT_FALSE(unit->isFinished());
 
     // First render: full buffer
-    unit.render(buffer.data(), 50, 2); // 50 frames, 2 channels
-    EXPECT_TRUE(unit.isFinished());
+    unit->render(buffer.data(), 50, 2); // 50 frames, 2 channels
+    EXPECT_TRUE(unit->isFinished());
 
     // Reset and check it's ready again
-    unit.reset();
-    EXPECT_FALSE(unit.isFinished());
+    unit->reset();
+    EXPECT_FALSE(unit->isFinished());
 
     // Second render: still works after reset
     std::fill(buffer.begin(), buffer.end(), 0.0f); // clear buffer
-    unit.render(buffer.data(), 50, 2);
-    EXPECT_TRUE(unit.isFinished());
+    unit->render(buffer.data(), 50, 2);
+    EXPECT_TRUE(unit->isFinished());
 
     // Spot-check audio content (optional)
     for (float sample : buffer)
@@ -112,10 +113,11 @@ TEST(SamplePlaybackTest, CompletesPlaybackAndResets)
 TEST(SamplePlaybackTest, PadsWithSilenceIfBufferLargerThanSample)
 {
     std::vector<float> pcm = {1.0f, 1.0f}; // 1 stereo frame
-    playback::SamplePlaybackUnit unit(pcm, 44100);
+    auto data = std::make_shared<SampleData>(std::move(pcm), 44100);
+    auto unit = playback::makePlaybackUnit(data);
 
     std::vector<float> buffer(6, -1.0f); // Request 3 frames
-    unit.render(buffer.data(), 3, 2);
+    unit->render(buffer.data(), 3, 2);
 
     // Expect: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     EXPECT_EQ(buffer[0], 1.0f);
@@ -127,17 +129,18 @@ TEST(SamplePlaybackTest, PadsWithSilenceIfBufferLargerThanSample)
 TEST(SamplePlaybackUnit, ResetRestartsPlaybackFromBeginning)
 {
     std::vector<float> pcm(20, 0.25f); // 10 stereo frames
-    playback::SamplePlaybackUnit unit(pcm, 44100);
+    auto data = std::make_shared<SampleData>(std::move(pcm), 44100);
+    auto unit = playback::makePlaybackUnit(data);
 
     std::vector<float> buffer(20, 0.0f);
-    unit.render(buffer.data(), 10, 2);
-    EXPECT_TRUE(unit.isFinished());
+    unit->render(buffer.data(), 10, 2);
+    EXPECT_TRUE(unit->isFinished());
 
-    unit.reset();
-    EXPECT_FALSE(unit.isFinished());
+    unit->reset();
+    EXPECT_FALSE(unit->isFinished());
 
     std::fill(buffer.begin(), buffer.end(), 0.0f);
-    unit.render(buffer.data(), 10, 2);
+    unit->render(buffer.data(), 10, 2);
 
     for (float sample : buffer)
         EXPECT_NEAR(sample, 0.25f, 0.0001f);
@@ -167,7 +170,7 @@ TEST(MixerPlaybackUnit, MixesSingleUnitCorrectly)
     mock->renderCallCount = 1;
 
     playback::MixerPlaybackUnit mixer;
-    mixer.addUnit(mock.get());
+    mixer.addUnit(std::move(mock));
 
     float buffer[64];
     mixer.render(buffer, 32, 2);
@@ -185,7 +188,7 @@ TEST(MixerPlaybackUnit, RemovesFinishedUnits)
     mock->finishedAfterRender = true;
 
     playback::MixerPlaybackUnit mixer;
-    mixer.addUnit(mock.get());
+    mixer.addUnit(std::move(mock));
 
     float buffer[64];
     mixer.render(buffer, 32, 2); // First render, removes finished unit
@@ -199,7 +202,7 @@ TEST(MixerPlaybackUnit, ClearRemovesAllUnits)
     unit->fillValue = 1.0f;
 
     playback::MixerPlaybackUnit mixer;
-    mixer.addUnit(unit.get());
+    mixer.addUnit(std::move(unit));
 
     EXPECT_FALSE(mixer.isFinished());
 
@@ -240,7 +243,7 @@ TEST(TrackPlaybackUnit, AppliesVolumeAndPanCorrectly)
     track.setVolume(0.5f); // Halve output
     track.setPan(-1.0f);   // Full left
 
-    track.addSample(unit.get());
+    track.addSample(std::move(unit));
 
     float buffer[64] = {};
     track.render(buffer, 32, 2);
@@ -260,7 +263,7 @@ TEST(TrackPlaybackUnit, PanBiasesLeftOrRight)
     playback::TrackPlaybackUnit trackLeft;
     trackLeft.setVolume(1.0f);
     trackLeft.setPan(-1.0f); // Fully left
-    trackLeft.addSample(mockLeft.get());
+    trackLeft.addSample(std::move(mockLeft));
 
     float leftBuffer[64] = {};
     trackLeft.render(leftBuffer, 32, 2);
@@ -277,7 +280,7 @@ TEST(TrackPlaybackUnit, PanBiasesLeftOrRight)
     playback::TrackPlaybackUnit trackRight;
     trackRight.setVolume(1.0f);
     trackRight.setPan(1.0f); // Fully right
-    trackRight.addSample(mockRight.get());
+    trackRight.addSample(std::move(mockRight));
 
     float rightBuffer[64] = {};
     trackRight.render(rightBuffer, 32, 2);
@@ -292,10 +295,11 @@ TEST(TrackPlaybackUnit, PanBiasesLeftOrRight)
 TEST(TrackPlaybackUnit, ResetResetsAllSamples)
 {
     std::vector<float> pcm(20, 0.75f);
-    auto sample = std::make_unique<playback::SamplePlaybackUnit>(pcm, 44100);
+    auto data = std::make_shared<SampleData>(std::move(pcm), 44100);
+    auto unit = playback::makePlaybackUnit(data);
 
     playback::TrackPlaybackUnit track;
-    track.addSample(sample.get());
+    track.addSample(std::move(unit));
 
     float buffer[20];
     track.render(buffer, 5, 2);

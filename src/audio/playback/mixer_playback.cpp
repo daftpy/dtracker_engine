@@ -6,9 +6,9 @@ namespace dtracker::audio::playback
 {
 
     // Adds a new playback unit to the internal list
-    void MixerPlaybackUnit::addUnit(PlaybackUnit *unit)
+    void MixerPlaybackUnit::addUnit(std::unique_ptr<PlaybackUnit> unit)
     {
-        m_units.push_back(unit);
+        m_units.push_back(std::move(unit));
     }
 
     // Mixes all active units into the provided output buffer
@@ -53,10 +53,10 @@ namespace dtracker::audio::playback
     {
         std::cout << "MixerPlaybackUnit: resetting all contained units\n";
 
-        for (auto *unit : m_units)
-        {
-            unit->reset();
-        }
+        // for (auto *unit : m_units)
+        // {
+        //     unit->reset();
+        // }
     }
 
     // True if no units are left to play

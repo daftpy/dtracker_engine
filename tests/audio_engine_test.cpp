@@ -153,7 +153,7 @@ TEST(SampleManager, AddReturnsUniqueIds)
 TEST(SampleManager, GetSampleReturnsNullOnInvalidId)
 {
     dtracker::audio::SampleManager manager;
-    auto sample = manager.getSample(999); // Never added
+    auto sample = manager.getSampleData(999); // Never added
     EXPECT_EQ(sample, nullptr);
 }
 
@@ -163,7 +163,7 @@ TEST(SampleManager, RemoveSampleDeletesIt)
     int id = manager.addSample({0.1f, 0.2f}, 44100);
     EXPECT_TRUE(manager.removeSample(id));
     EXPECT_FALSE(manager.removeSample(id)); // Already removed
-    EXPECT_EQ(manager.getSample(id), nullptr);
+    EXPECT_EQ(manager.getSampleData(id), nullptr);
 }
 
 TEST(SampleManager, AllSampleIdsReflectsContents)

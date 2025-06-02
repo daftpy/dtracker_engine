@@ -1,3 +1,4 @@
+#include <dtracker/audio/playback/sample_playback_unit.hpp>
 #include <dtracker/tracker/track_manager.hpp>
 
 namespace dtracker::tracker
@@ -24,9 +25,10 @@ namespace dtracker::tracker
             if (!m_sampleManager)
                 continue;
 
-            auto unit = m_sampleManager->getSample(id);
+            auto data = m_sampleManager->getSampleData(id);
+            auto unit = dtracker::audio::playback::makePlaybackUnit(data);
             if (unit)
-                track->addSample(unit);
+                track->addSample(std::move(unit));
         }
 
         // Store the track using a unique track ID
@@ -66,9 +68,14 @@ namespace dtracker::tracker
         // Add the samples to the track if they exist
         for (int id : sampleIds)
         {
-            auto unit = m_sampleManager->getSample(id);
+            // auto unit = m_sampleManager->getSample(id);
+            auto data = m_sampleManager->getSampleData(id);
+            if (!data)
+                return false;
+
+            auto unit = audio::playback::makePlaybackUnit(data);
             if (unit)
-                track->addSample(unit);
+                track->addSample(std::move(unit));
         }
 
         return true;

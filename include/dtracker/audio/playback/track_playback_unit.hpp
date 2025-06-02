@@ -10,7 +10,7 @@ namespace dtracker::audio::playback
     {
       public:
         // void addSample(std::unique_ptr<PlaybackUnit> unit);
-        void addSample(playback::PlaybackUnit *unit);
+        void addSample(std::unique_ptr<PlaybackUnit> unit);
         void setVolume(float v);
         void setPan(float p); // -1.0 (left) to 1.0 (right)
 
@@ -23,7 +23,7 @@ namespace dtracker::audio::playback
       private:
         float m_volume = 1.0f;
         float m_pan = 0.0f; // -1.0 left, 0 center, 1.0 right
-        // std::vector<std::unique_ptr<PlaybackUnit>> m_units;
-        std::vector<playback::PlaybackUnit *> m_units;
+        std::vector<std::unique_ptr<PlaybackUnit>> m_units;
+        // std::vector<playback::PlaybackUnit *> m_units;
     };
 } // namespace dtracker::audio::playback
