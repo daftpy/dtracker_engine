@@ -76,6 +76,21 @@ namespace dtracker::audio
                 nullptr); // clears the delegate in the proxy
     }
 
+    void PlaybackManager::playPattern(std::vector<int> sampleIds,
+                                      float stepIntervalMs)
+    {
+        if (sampleIds.empty())
+            return;
+
+        ActivePattern pattern;
+        pattern.steps = sampleIds;
+        pattern.stepIntervalMs = stepIntervalMs; // Time between steps
+        pattern.elapsedMs = 0.0f;                // Time accumulator
+        pattern.currentStep = 0;                 // Start from beginning
+
+        m_activePatterns.push_back(std::move(pattern));
+    }
+
     // Returns true if Engine is currently streaming audio
     bool PlaybackManager::isPlaying() const
     {

@@ -3,6 +3,7 @@
 #include <dtracker/audio/engine.hpp>
 #include <dtracker/audio/playback/playback_unit.hpp>
 #include <dtracker/audio/sample_manager.hpp>
+#include <dtracker/tracker/types/active_pattern.hpp>
 #include <memory>
 
 namespace dtracker::audio
@@ -26,6 +27,9 @@ namespace dtracker::audio
         // Stops current playback if active
         void stopPlayback();
 
+        void playPattern(std::vector<int> sampleIds,
+                         float stepIntervalMs = 100.0f);
+
         // Returns whether the audio stream is currently running
         bool isPlaying() const;
 
@@ -33,5 +37,7 @@ namespace dtracker::audio
         Engine *m_engine{nullptr}; // Not owned
         SampleManager *m_sampleManager;
         std::vector<std::unique_ptr<playback::PlaybackUnit>> m_activeUnits;
+
+        std::vector<ActivePattern> m_activePatterns;
     };
 } // namespace dtracker::audio
