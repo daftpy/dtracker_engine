@@ -4,6 +4,7 @@
 #include <dtracker/sample/types.hpp>
 #include <list>
 #include <memory>
+#include <optional>
 #include <shared_mutex>
 #include <string>
 #include <unordered_map>
@@ -14,6 +15,7 @@ namespace dtracker::sample
     struct CacheEntry
     {
         std::shared_ptr<const audio::types::PCMData> data;
+        audio::types::AudioProperties properties;
         std::list<std::string>::iterator useIt;
     };
 
@@ -24,7 +26,8 @@ namespace dtracker::sample
         Cache(size_t capacity);
 
         // Add PCM data to the cache with a unique key
-        bool insert(const std::string &key, audio::types::PCMData data);
+        bool insert(const std::string &key, audio::types::PCMData data,
+                    audio::types::AudioProperties properties);
 
         std::shared_ptr<const audio::types::PCMData>
         get(const std::string &key);
@@ -40,6 +43,8 @@ namespace dtracker::sample
         size_t size() const;
 
         void clear();
+
+        std::optional<CacheEntry> peek(const std::string &key) const;
 
       private:
         void evictToCapacity();

@@ -26,9 +26,9 @@ namespace dtracker::tracker
                 continue;
 
             auto data = m_sampleManager->getSampleData(id);
-            auto unit = dtracker::audio::playback::makePlaybackUnit(data);
-            if (unit)
-                track->addSample(std::move(unit));
+            // auto unit = dtracker::audio::playback::makePlaybackUnit(data);
+            // if (unit)
+            //     track->addSample(std::move(unit));
         }
 
         // Store the track using a unique track ID
@@ -73,9 +73,9 @@ namespace dtracker::tracker
             if (!data)
                 return false;
 
-            auto unit = audio::playback::makePlaybackUnit(data);
-            if (unit)
-                track->addSample(std::move(unit));
+            // auto unit = audio::playback::makePlaybackUnit(data);
+            // if (unit)
+            //     track->addSample(std::move(unit));
         }
 
         return true;

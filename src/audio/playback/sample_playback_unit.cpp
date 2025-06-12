@@ -4,26 +4,24 @@
 
 namespace dtracker::audio::playback
 {
-
-    SamplePlaybackUnit::SamplePlaybackUnit(
-        std::shared_ptr<const SampleData> data)
-        : m_data(std::move(data))
+    dtracker::audio::playback::SamplePlaybackUnit::SamplePlaybackUnit(
+        sample::types::SampleDescriptor descriptor)
+        : m_descriptor(std::move(descriptor))
     {
-        // m_data is expected to be even-length and stereo-safe,
-        // handled during creation in SampleData constructor.
     }
 
     void SamplePlaybackUnit::render(float *buffer, unsigned int frames,
                                     unsigned int channels)
     {
-        if (!m_data || channels != 2)
+        const auto pcmPtr = m_descriptor.pcmData();
+        if (!pcmPtr || channels != 2)
         {
             // Fill with silence if no data or unsupported channel config
             std::fill(buffer, buffer + (frames * channels), 0.0f);
             return;
         }
 
-        const auto &samples = m_data->data();
+        const auto &samples = *pcmPtr;
         const size_t samplesToWrite = frames * channels;
         const size_t samplesRemaining =
             samples.size() > m_position ? samples.size() - m_position : 0;
@@ -42,7 +40,8 @@ namespace dtracker::audio::playback
 
     bool SamplePlaybackUnit::isFinished() const
     {
-        return !m_data || m_position >= m_data->data().size();
+        const auto pcmPtr = m_descriptor.pcmData();
+        return !pcmPtr || m_position >= pcmPtr->size();
     }
 
     void SamplePlaybackUnit::reset()
@@ -52,18 +51,18 @@ namespace dtracker::audio::playback
 
     const std::vector<float> &SamplePlaybackUnit::data() const
     {
-        return m_data->data();
+        return *m_descriptor.pcmData();
     }
 
     unsigned int SamplePlaybackUnit::sampleRate() const
     {
-        return m_data ? m_data->sampleRate() : 44100; // fallback if null
+        return m_descriptor.metadata().sourceSampleRate;
     }
 
     std::unique_ptr<SamplePlaybackUnit>
-    makePlaybackUnit(std::shared_ptr<const dtracker::audio::SampleData> data)
+    makePlaybackUnit(sample::types::SampleDescriptor descriptor)
     {
-        return std::make_unique<SamplePlaybackUnit>(std::move(data));
+        return std::make_unique<SamplePlaybackUnit>(std::move(descriptor));
     }
 
 } // namespace dtracker::audio::playback

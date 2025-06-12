@@ -4,7 +4,8 @@ namespace dtracker::sample
 {
     Cache::Cache(size_t capacity) : m_capacity(capacity) {}
 
-    bool Cache::insert(const std::string &key, audio::types::PCMData data)
+    bool Cache::insert(const std::string &key, audio::types::PCMData data,
+                       audio::types::AudioProperties properties)
     {
         // Lock for writes to update LRU pos
         std::unique_lock lock(m_mutex);
@@ -30,6 +31,7 @@ namespace dtracker::sample
             m_useOrder.push_front(key);
             m_cache[key] = {
                 std::make_shared<audio::types::PCMData>(std::move(data)),
+                properties,
                 m_useOrder.begin() // Front of the LRU
             };
         }
@@ -115,5 +117,18 @@ namespace dtracker::sample
             m_cache.erase(lruKey);
             m_useOrder.pop_back();
         }
+    }
+
+    std::optional<CacheEntry>
+    dtracker::sample::Cache::peek(const std::string &key) const
+    {
+        std::shared_lock lock(m_mutex);
+
+        auto it = m_cache.find(key);
+        if (it != m_cache.end())
+        {
+            return it->second;
+        }
+        return std::nullopt;
     }
 } // namespace dtracker::sample

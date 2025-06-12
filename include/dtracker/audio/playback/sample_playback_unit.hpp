@@ -2,6 +2,7 @@
 
 #include <dtracker/audio/playback/playback_unit.hpp>
 #include <dtracker/audio/sample_data.hpp>
+#include <dtracker/sample/types.hpp>
 #include <memory>
 #include <vector>
 
@@ -19,7 +20,8 @@ namespace dtracker::audio::playback
          * Constructs a SamplePlaybackUnit using a shared SampleData buffer.
          * The data is assumed to be stereo interleaved and even-length.
          */
-        explicit SamplePlaybackUnit(std::shared_ptr<const SampleData> data);
+        // explicit SamplePlaybackUnit(std::shared_ptr<const SampleData> data);
+        explicit SamplePlaybackUnit(sample::types::SampleDescriptor descriptor);
 
         /**
          * Renders audio from the sample buffer into the output buffer.
@@ -49,12 +51,11 @@ namespace dtracker::audio::playback
         unsigned int sampleRate() const;
 
       private:
-        std::shared_ptr<const SampleData>
-            m_data;            // Shared backing sample buffer
+        sample::types::SampleDescriptor m_descriptor;
         size_t m_position = 0; // Current playback position (sample index)
     };
 
     std::unique_ptr<SamplePlaybackUnit>
-    makePlaybackUnit(std::shared_ptr<const dtracker::audio::SampleData> data);
+    makePlaybackUnit(sample::types::SampleDescriptor descriptor);
 
 } // namespace dtracker::audio::playback

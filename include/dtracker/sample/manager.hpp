@@ -15,8 +15,8 @@ namespace dtracker::sample
         Manager() = default;
 
         std::shared_ptr<const audio::types::PCMData>
-        cacheSample(const std::string &sampleLoc,
-                    audio::types::PCMData pcmData);
+        cacheSample(const std::string &sampleLoc, audio::types::PCMData pcmData,
+                    const types::SampleMetadata &metaData);
 
         int addSample(const std::string &sampleLoc,
                       audio::types::PCMData pcmData,
@@ -27,6 +27,10 @@ namespace dtracker::sample
         bool removeSample(int id);
 
         std::vector<int> getAllSampleIds() const;
+
+        bool contains(const std::string &path) const;
+
+        std::optional<CacheEntry> peekCache(const std::string &path);
 
       private:
         mutable std::shared_mutex m_registryMutex;

@@ -14,7 +14,7 @@ namespace dtracker::sample::types
         unsigned int sourceSampleRate;
 
         // The original bit depth (e.g., 16, 24).
-        int bitDepth;
+        unsigned int bitDepth;
     };
 
     class SampleDescriptor

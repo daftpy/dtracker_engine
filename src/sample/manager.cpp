@@ -4,12 +4,12 @@ namespace dtracker::sample
 {
     std::shared_ptr<const audio::types::PCMData>
     Manager::cacheSample(const std::string &sampleLoc,
-                         audio::types::PCMData pcmData)
+                         audio::types::PCMData pcmData,
+                         const types::SampleMetadata &metaData)
     {
-        if (!m_cache.contains(sampleLoc))
-        {
-            m_cache.insert(sampleLoc, std::move(pcmData));
-        }
+        m_cache.insert(sampleLoc, std::move(pcmData),
+                       {metaData.sourceSampleRate, metaData.bitDepth, 2});
+
         return m_cache.get(sampleLoc);
     }
 
@@ -17,18 +17,14 @@ namespace dtracker::sample
                            audio::types::PCMData pcmData,
                            const types::SampleMetadata &metaData)
     {
+        m_cache.insert(sampleLoc, std::move(pcmData),
+                       {metaData.sourceSampleRate, metaData.bitDepth, 2});
 
-        if (!m_cache.contains(sampleLoc))
-        {
-            m_cache.insert(sampleLoc, std::move(pcmData));
+        std::unique_lock lock(m_registryMutex);
+        auto id = m_nextId++;
 
-            std::unique_lock lock(m_registryMutex);
-            auto id = m_nextId++;
-
-            m_sampleRegistry[id] = {id, sampleLoc, metaData};
-            return id;
-        }
-        return -1;
+        m_sampleRegistry[id] = {id, sampleLoc, metaData};
+        return id;
     }
 
     std::optional<types::SampleDescriptor> Manager::getSample(int id)
@@ -47,6 +43,12 @@ namespace dtracker::sample
             }
         }
         return std::nullopt;
+    }
+
+    std::optional<CacheEntry>
+    dtracker::sample::Manager::peekCache(const std::string &path)
+    {
+        return m_cache.peek(path);
     }
 
     bool Manager::removeSample(int id)
@@ -77,5 +79,12 @@ namespace dtracker::sample
         }
 
         return ids;
+    }
+
+    bool dtracker::sample::Manager::contains(const std::string &path) const
+    {
+        std::shared_lock lock(m_registryMutex);
+
+        return m_cache.contains(path);
     }
 } // namespace dtracker::sample

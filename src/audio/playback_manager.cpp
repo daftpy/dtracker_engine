@@ -26,46 +26,46 @@ namespace dtracker::audio
     void PlaybackManager::playSample(std::vector<float> pcmData,
                                      unsigned int sampleRate)
     {
-        if (!m_engine)
-            return;
+        // if (!m_engine)
+        //     return;
 
-        // auto unit = std::make_unique<playback::SamplePlaybackUnit>(
-        //     std::move(pcmData), sampleRate);
-        auto sharedSample =
-            std::make_shared<SampleData>(std::move(pcmData), sampleRate);
-        auto unit = playback::makePlaybackUnit(sharedSample);
-        m_engine->proxyPlaybackUnit()->setDelegate(unit.get());
-        std::cout << "Playing sample\nVector Size: " << m_activeUnits.size()
-                  << "\n";
-        m_activeUnits.push_back(std::move(unit));
+        // // auto unit = std::make_unique<playback::SamplePlaybackUnit>(
+        // //     std::move(pcmData), sampleRate);
+        // auto sharedSample =
+        //     std::make_shared<SampleData>(std::move(pcmData), sampleRate);
+        // auto unit = playback::makePlaybackUnit(sharedSample);
+        // m_engine->proxyPlaybackUnit()->setDelegate(unit.get());
+        // std::cout << "Playing sample\nVector Size: " << m_activeUnits.size()
+        //           << "\n";
+        // m_activeUnits.push_back(std::move(unit));
     }
 
     void PlaybackManager::playSampleById(int sampleId)
     {
-        std::cout << "Playing sample by ID\n";
-        if (!m_sampleManager || !m_engine)
-            return;
+        // std::cout << "Playing sample by ID\n";
+        // if (!m_sampleManager || !m_engine)
+        //     return;
 
-        std::cout << "Retrieving sample by ID " << sampleId << "\n";
-        // auto unit = m_sampleManager->getSample(sampleId);
-        auto data = m_sampleManager->getSampleData(sampleId);
-        auto unit = playback::makePlaybackUnit(data);
-        if (!unit)
-        {
-            std::cout << "No sample found\n";
-            return;
-        }
-        unit->reset();
+        // std::cout << "Retrieving sample by ID " << sampleId << "\n";
+        // // auto unit = m_sampleManager->getSample(sampleId);
+        // auto data = m_sampleManager->getSampleData(sampleId);
+        // auto unit = playback::makePlaybackUnit(data);
+        // if (!unit)
+        // {
+        //     std::cout << "No sample found\n";
+        //     return;
+        // }
+        // unit->reset();
 
-        auto *mixer = m_engine->mixerUnit();
-        if (!mixer)
-        {
-            std::cout << "No mixer unit found\n";
-            return;
-        }
+        // auto *mixer = m_engine->mixerUnit();
+        // if (!mixer)
+        // {
+        //     std::cout << "No mixer unit found\n";
+        //     return;
+        // }
 
-        std::cout << "Adding sample to mixer " << sampleId << "\n";
-        mixer->addUnit(std::move(unit));
+        // std::cout << "Adding sample to mixer " << sampleId << "\n";
+        // mixer->addUnit(std::move(unit));
     }
 
     // Stops playback by calling Engine's stop
