@@ -23,6 +23,8 @@ namespace dtracker::sample
                       std::shared_ptr<const audio::types::PCMData> pcmData,
                       const types::SampleMetadata &metaData);
 
+        int addSample(const std::string &sampleLoc);
+
         std::optional<types::SampleDescriptor> getSample(int id);
 
         bool removeSample(int id);

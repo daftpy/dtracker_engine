@@ -27,6 +27,29 @@ namespace dtracker::sample
         return id;
     }
 
+    int dtracker::sample::Manager::addSample(const std::string &sampleLoc)
+    {
+        auto cacheEntry = m_cache.peek(sampleLoc);
+
+        if (!cacheEntry.has_value())
+        {
+            return -1;
+        }
+
+        const auto &entry = cacheEntry.value();
+
+        types::SampleMetadata metaData;
+        metaData.sourceSampleRate = entry.properties.sampleRate;
+        metaData.bitDepth = entry.properties.bitDepth;
+
+        // Lock to protect the map and id
+        std::unique_lock lock(m_registryMutex);
+
+        auto id = m_nextId++;
+        m_sampleRegistry[id] = {id, sampleLoc, metaData};
+        return id;
+    }
+
     std::optional<types::SampleDescriptor> Manager::getSample(int id)
     {
         std::shared_lock lock(m_registryMutex);
