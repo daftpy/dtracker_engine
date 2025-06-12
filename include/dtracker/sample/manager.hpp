@@ -15,11 +15,12 @@ namespace dtracker::sample
         Manager() = default;
 
         std::shared_ptr<const audio::types::PCMData>
-        cacheSample(const std::string &sampleLoc, audio::types::PCMData pcmData,
+        cacheSample(const std::string &sampleLoc,
+                    std::shared_ptr<const audio::types::PCMData> pcmData,
                     const types::SampleMetadata &metaData);
 
         int addSample(const std::string &sampleLoc,
-                      audio::types::PCMData pcmData,
+                      std::shared_ptr<const audio::types::PCMData> pcmData,
                       const types::SampleMetadata &metaData);
 
         std::optional<types::SampleDescriptor> getSample(int id);

@@ -26,7 +26,8 @@ namespace dtracker::sample
         Cache(size_t capacity);
 
         // Add PCM data to the cache with a unique key
-        bool insert(const std::string &key, audio::types::PCMData data,
+        bool insert(const std::string &key,
+                    std::shared_ptr<const audio::types::PCMData> data,
                     audio::types::AudioProperties properties);
 
         std::shared_ptr<const audio::types::PCMData>

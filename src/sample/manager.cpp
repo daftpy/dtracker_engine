@@ -4,7 +4,7 @@ namespace dtracker::sample
 {
     std::shared_ptr<const audio::types::PCMData>
     Manager::cacheSample(const std::string &sampleLoc,
-                         audio::types::PCMData pcmData,
+                         std::shared_ptr<const audio::types::PCMData> pcmData,
                          const types::SampleMetadata &metaData)
     {
         m_cache.insert(sampleLoc, std::move(pcmData),
@@ -14,7 +14,7 @@ namespace dtracker::sample
     }
 
     int Manager::addSample(const std::string &sampleLoc,
-                           audio::types::PCMData pcmData,
+                           std::shared_ptr<const audio::types::PCMData> pcmData,
                            const types::SampleMetadata &metaData)
     {
         m_cache.insert(sampleLoc, std::move(pcmData),

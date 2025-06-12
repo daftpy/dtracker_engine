@@ -13,9 +13,9 @@ class CacheTest : public ::testing::Test
   protected:
     Cache cache{2}; // LRU capacity = 2
 
-    PCMData makePCM(float v, size_t size = 4)
+    std::shared_ptr<PCMData> makePCM(float v, size_t size = 4)
     {
-        return PCMData(size, v);
+        return std::make_shared<PCMData>(size, v);
     }
 };
 
