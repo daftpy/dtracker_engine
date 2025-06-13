@@ -1,6 +1,6 @@
 #pragma once
 #include <dtracker/audio/playback/track_playback_unit.hpp>
-#include <dtracker/audio/sample_manager.hpp>
+#include <dtracker/sample/manager.hpp>
 #include <memory>
 #include <unordered_map>
 
@@ -9,7 +9,7 @@ namespace dtracker::tracker
     class TrackManager
     {
       public:
-        explicit TrackManager(audio::SampleManager *sampleManager);
+        explicit TrackManager(sample::Manager *sampleManager);
 
         // Creates and stores a new track, returns its ID
         int createTrack(std::vector<int> sampleIds, float volume = 1.0f,
@@ -31,7 +31,7 @@ namespace dtracker::tracker
         std::vector<int> allTrackIds() const;
 
       private:
-        audio::SampleManager *m_sampleManager = nullptr;
+        sample::Manager *m_sampleManager{nullptr};
         std::unordered_map<int,
                            std::unique_ptr<audio::playback::TrackPlaybackUnit>>
             m_tracks;

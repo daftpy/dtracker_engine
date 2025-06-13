@@ -6,7 +6,7 @@ namespace dtracker::audio
 {
     // Initializes PlaybackManager with an Engine pointer
     PlaybackManager::PlaybackManager(Engine *engine,
-                                     SampleManager *sampleManager)
+                                     sample::Manager *sampleManager)
         : m_engine(engine), m_sampleManager(sampleManager)
     {
     }

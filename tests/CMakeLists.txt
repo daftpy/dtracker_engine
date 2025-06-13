@@ -9,7 +9,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 # Define test executable
-add_executable(audio_engine_test audio_engine_test.cpp track_manager_test.cpp playback_units_test.cpp sample_cache_test.cpp)
+add_executable(audio_engine_test 
+  audio_engine_test.cpp
+  track_manager_test.cpp
+  playback_units_test.cpp
+  sample_cache_test.cpp
+  sample_manager_test.cpp
+)
 
 target_link_libraries(audio_engine_test
   gtest_main

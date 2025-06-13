@@ -5,7 +5,7 @@
 #include <dtracker/audio/playback/mixer_playback.hpp>
 #include <dtracker/audio/playback/playback_unit.hpp>
 #include <dtracker/audio/playback/proxy_playback_unit.hpp>
-#include <dtracker/audio/types/audio_settings.hpp>
+#include <dtracker/audio/types.hpp>
 #include <dtracker/audio/types/waves/sine_wav.hpp>
 #include <memory>
 #include <optional>

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <dtracker/audio/playback/playback_unit.hpp>
-#include <dtracker/audio/sample_data.hpp>
 #include <dtracker/sample/types.hpp>
 #include <memory>
 #include <vector>

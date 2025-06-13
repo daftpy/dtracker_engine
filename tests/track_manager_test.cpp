@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include <dtracker/audio/sample_manager.hpp>
+#include <dtracker/sample/manager.hpp>
 #include <dtracker/tracker/track_manager.hpp>
 
 // Ensure TrackManager initializes properly with a sample manager
 TEST(TrackManager, InitializesWithSampleManager)
 {
-    dtracker::audio::SampleManager sampleManager;
+    dtracker::sample::Manager sampleManager;
     dtracker::tracker::TrackManager tm(&sampleManager);
     EXPECT_TRUE(tm.allTrackIds().empty());
 }
@@ -14,7 +14,7 @@ TEST(TrackManager, InitializesWithSampleManager)
 // Create an empty track and verify it is retrievable
 TEST(TrackManager, CreatesEmptyTrack)
 {
-    dtracker::audio::SampleManager sampleManager;
+    dtracker::sample::Manager sampleManager;
     dtracker::tracker::TrackManager tm(&sampleManager);
     int id = tm.createTrack();
     EXPECT_TRUE(tm.getTrack(id) != nullptr);
@@ -23,9 +23,18 @@ TEST(TrackManager, CreatesEmptyTrack)
 // Create a track with two valid samples and verify it's not finished
 TEST(TrackManager, CreatesTrackWithSamples)
 {
-    dtracker::audio::SampleManager sampleManager;
-    int s1 = sampleManager.addSample({0.1f, 0.2f}, 44100);
-    int s2 = sampleManager.addSample({0.3f, 0.4f}, 44100);
+    dtracker::sample::Manager sampleManager;
+    int s1 = sampleManager.addSample(
+        "sample1",
+        std::make_shared<const dtracker::audio::types::PCMData>(
+            dtracker::audio::types::PCMData{0.1f, 0.2f, 0.3f}),
+        {44100, 32});
+
+    int s2 = sampleManager.addSample(
+        "sample2",
+        std::make_shared<const dtracker::audio::types::PCMData>(
+            dtracker::audio::types::PCMData{0.4f, 0.5f}),
+        {44100, 32});
     dtracker::tracker::TrackManager tm(&sampleManager);
     int id = tm.createTrack({s1, s2});
     auto *track = tm.getTrack(id);
@@ -36,7 +45,7 @@ TEST(TrackManager, CreatesTrackWithSamples)
 // Ensure tracks can be removed and are no longer accessible
 TEST(TrackManager, RemovesTrack)
 {
-    dtracker::audio::SampleManager sampleManager;
+    dtracker::sample::Manager sampleManager;
     dtracker::tracker::TrackManager tm(&sampleManager);
     int id = tm.createTrack();
     EXPECT_TRUE(tm.removeTrack(id));
@@ -46,7 +55,7 @@ TEST(TrackManager, RemovesTrack)
 // Querying a non-existent track should return nullptr
 TEST(TrackManager, GetNonExistentTrackReturnsNull)
 {
-    dtracker::audio::SampleManager sampleManager;
+    dtracker::sample::Manager sampleManager;
     dtracker::tracker::TrackManager tm(&sampleManager);
     EXPECT_EQ(tm.getTrack(9999), nullptr);
 }
@@ -54,7 +63,7 @@ TEST(TrackManager, GetNonExistentTrackReturnsNull)
 // Track IDs should accurately reflect currently stored tracks
 TEST(TrackManager, AllTrackIdsReflectsContents)
 {
-    dtracker::audio::SampleManager sampleManager;
+    dtracker::sample::Manager sampleManager;
     dtracker::tracker::TrackManager tm(&sampleManager);
     int a = tm.createTrack();
     int b = tm.createTrack();
@@ -66,8 +75,12 @@ TEST(TrackManager, AllTrackIdsReflectsContents)
 
 TEST(TrackManager, CanAddSamplesToExistingTrack)
 {
-    dtracker::audio::SampleManager sampleManager;
-    int s1 = sampleManager.addSample({0.1f, 0.2f}, 44100);
+    dtracker::sample::Manager sampleManager;
+    int s1 = sampleManager.addSample(
+        "sample1",
+        std::make_shared<const dtracker::audio::types::PCMData>(
+            dtracker::audio::types::PCMData{0.1f, 0.2f, 0.3f}),
+        {44100, 32});
     dtracker::tracker::TrackManager tm(&sampleManager);
 
     int trackId = tm.createTrack();

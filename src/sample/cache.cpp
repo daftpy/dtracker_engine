@@ -8,32 +8,33 @@ namespace dtracker::sample
                        std::shared_ptr<const audio::types::PCMData> data,
                        audio::types::AudioProperties properties)
     {
-        // Lock for writes to update LRU pos
+        // Acquire a unique lock for the entire write operation.
         std::unique_lock lock(m_mutex);
 
-        // If it already exists
         auto it = m_cache.find(key);
         if (it != m_cache.end())
         {
-            // Update the data
+            // Update existing entry
             it->second.data = std::move(data);
 
-            // Update LRU
+            // Move to the front of the usage list to mark as most recently
+            // used.
             m_useOrder.erase(it->second.useIt);
             m_useOrder.push_front(key);
-
-            // Update iter member
             it->second.useIt = m_useOrder.begin();
         }
-        // otherise, create the new entry
         else
         {
+            // Create new entry
             m_useOrder.push_front(key);
             m_cache[key] = {
                 std::move(data), properties,
-                m_useOrder.begin() // Front of the LRU
+                m_useOrder
+                    .begin() // Iterator points to the front of the LRU list.
             };
         }
+
+        // Remove the least recently used items if over capacity.
         evictToCapacity();
         return true;
     }
@@ -41,19 +42,17 @@ namespace dtracker::sample
     std::shared_ptr<const audio::types::PCMData>
     Cache::get(const std::string &key)
     {
-        // Lock for writes to update LRU
+        // Acquire a unique lock because we are modifying the LRU list.
         std::unique_lock lock(m_mutex);
 
-        // If it exists
         auto it = m_cache.find(key);
         if (it != m_cache.end())
         {
-            // Update the LRU pos
+            // Move the accessed item to the front of the usage list.
             m_useOrder.erase(it->second.useIt);
             m_useOrder.push_front(key);
-
-            // Return the data
             it->second.useIt = m_useOrder.begin();
+
             return it->second.data;
         }
         return nullptr;
@@ -63,11 +62,9 @@ namespace dtracker::sample
     {
         std::unique_lock lock(m_mutex);
 
-        // If the key exists
         auto it = m_cache.find(key);
         if (it != m_cache.end())
         {
-            // Erase it from the LRU and Cache
             m_useOrder.erase(it->second.useIt);
             m_cache.erase(it);
             return true;
@@ -75,17 +72,18 @@ namespace dtracker::sample
         return false;
     }
 
+    // A read-only operation.
     bool Cache::contains(const std::string &key) const
     {
+        // Use a shared lock for concurrent read access.
         std::shared_lock lock(m_mutex);
-        return m_cache.find(key) != m_cache.end();
+        return m_cache.count(key) > 0;
     }
 
     void Cache::setCapacity(size_t capacity)
     {
         std::unique_lock lock(m_mutex);
         m_capacity = capacity;
-
         evictToCapacity();
     }
 
@@ -108,19 +106,22 @@ namespace dtracker::sample
         m_useOrder.clear();
     }
 
+    // Internal helper; must be called from within a unique_lock.
     void Cache::evictToCapacity()
     {
         while (m_capacity > 0 && m_cache.size() > m_capacity)
         {
+            // Get the key of the least recently used item (from the back).
             const std::string &lruKey = m_useOrder.back();
             m_cache.erase(lruKey);
             m_useOrder.pop_back();
         }
     }
 
-    std::optional<CacheEntry>
-    dtracker::sample::Cache::peek(const std::string &key) const
+    // A read-only operation that does not affect LRU order.
+    std::optional<types::CacheEntry> Cache::peek(const std::string &key) const
     {
+        // Use a shared lock for concurrent read access.
         std::shared_lock lock(m_mutex);
 
         auto it = m_cache.find(key);

@@ -2,7 +2,7 @@
 
 #include <dtracker/audio/engine.hpp>
 #include <dtracker/audio/playback/playback_unit.hpp>
-#include <dtracker/audio/sample_manager.hpp>
+#include <dtracker/sample/manager.hpp>
 #include <dtracker/tracker/types/active_pattern.hpp>
 #include <memory>
 
@@ -13,7 +13,8 @@ namespace dtracker::audio
       public:
         // Constructs the manager with a reference to an existing Engine (not
         // owned)
-        explicit PlaybackManager(Engine *engine, SampleManager *sampleManager);
+        explicit PlaybackManager(Engine *engine,
+                                 sample::Manager *sampleManager);
 
         // Plays a test sine tone with the given frequency (default is 440Hz)
         void playTestTone(float freq = 440.0f);
@@ -35,7 +36,7 @@ namespace dtracker::audio
 
       private:
         Engine *m_engine{nullptr}; // Not owned
-        SampleManager *m_sampleManager;
+        sample::Manager *m_sampleManager;
         std::vector<std::unique_ptr<playback::PlaybackUnit>> m_activeUnits;
 
         std::vector<ActivePattern> m_activePatterns;

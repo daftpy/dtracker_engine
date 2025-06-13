@@ -3,7 +3,7 @@
 
 namespace dtracker::tracker
 {
-    TrackManager::TrackManager(audio::SampleManager *sampleManager)
+    TrackManager::TrackManager(sample::Manager *sampleManager)
         : m_sampleManager(sampleManager)
     {
     }
@@ -25,7 +25,7 @@ namespace dtracker::tracker
             if (!m_sampleManager)
                 continue;
 
-            auto data = m_sampleManager->getSampleData(id);
+            // auto data = m_sampleManager->getSampleData(id);
             // auto unit = dtracker::audio::playback::makePlaybackUnit(data);
             // if (unit)
             //     track->addSample(std::move(unit));
@@ -69,9 +69,9 @@ namespace dtracker::tracker
         for (int id : sampleIds)
         {
             // auto unit = m_sampleManager->getSample(id);
-            auto data = m_sampleManager->getSampleData(id);
-            if (!data)
-                return false;
+            // auto data = m_sampleManager->getSampleData(id);
+            // if (!data)
+            return false;
 
             // auto unit = audio::playback::makePlaybackUnit(data);
             // if (unit)

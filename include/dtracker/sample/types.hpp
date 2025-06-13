@@ -1,12 +1,20 @@
 #pragma once
 #include <cstdint>
 #include <dtracker/audio/types.hpp>
+#include <list>
 #include <memory>
 #include <string>
 #include <vector>
 
+
 namespace dtracker::sample::types
 {
+    struct CacheEntry
+    {
+        std::shared_ptr<const audio::types::PCMData> data;
+        audio::types::AudioProperties properties;
+        std::list<std::string>::iterator useIt;
+    };
 
     struct SampleMetadata
     {
