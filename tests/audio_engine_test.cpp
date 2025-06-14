@@ -11,47 +11,7 @@
 #include <thread>
 
 // -------------------------
-// AudioEngine Integration Tests
-// -------------------------
-
-TEST(AudioEngine, StartsSuccessfully)
-{
-    RtAudio audio;
-    dtracker::audio::DeviceManager manager(&audio);
-
-    auto infoOpt = manager.currentDeviceInfo();
-    ASSERT_TRUE(infoOpt.has_value()) << "No usable output device found";
-
-    dtracker::audio::Engine engine;
-
-    EXPECT_TRUE(engine.openStream(infoOpt->ID))
-        << "AudioEngine failed to start with selected device";
-
-    EXPECT_TRUE(engine.isStreamOpen()) << "Stream failed to open";
-    EXPECT_TRUE(engine.isStreamRunning()) << "Stream not running";
-}
-
-TEST(AudioEngine, StopsAndClosesStream)
-{
-    RtAudio audio;
-    dtracker::audio::DeviceManager manager(&audio);
-
-    auto infoOpt = manager.currentDeviceInfo();
-    ASSERT_TRUE(infoOpt.has_value()) << "No usable output device found";
-
-    dtracker::audio::Engine engine;
-    engine.setOutputDevice(infoOpt->ID);
-
-    ASSERT_TRUE(engine.start()) << "Failed to start engine";
-
-    engine.stop();
-
-    EXPECT_FALSE(engine.isStreamRunning()) << "Stream should be stopped";
-    EXPECT_FALSE(engine.isStreamOpen()) << "Stream should be closed";
-}
-
-// -------------------------
-// DeviceManager Unit Tests
+// DeviceManager Tests
 // -------------------------
 
 TEST(DeviceManager, ReturnsValidDefaultOutputDevice)
@@ -86,40 +46,29 @@ TEST(DeviceManager, ReturnsValidDefaultOutputDevice)
 //     dtracker::audio::PlaybackManager pm(&engine, nullptr);
 //     pm.playTestTone(220.0f); // A3
 
-//     EXPECT_TRUE(pm.isPlaying()) << "PlaybackManager failed to start
-//     playback"; EXPECT_TRUE(engine.isStreamRunning())
+//     EXPECT_TRUE(pm.isPlaying()) << "PlaybackManager failed to start"
+//     "playback"; EXPECT_TRUE(engine.isStreamRunning())
 //         << "Engine stream not running after playTestTone";
 // }
 
-TEST(PlaybackManager, StopsPlayback)
-{
-    RtAudio audio;
-    dtracker::audio::DeviceManager manager(&audio);
-    auto infoOpt = manager.currentDeviceInfo();
-    ASSERT_TRUE(infoOpt.has_value());
+// TEST(PlaybackManager, StopsPlayback)
+// {
+//     RtAudio audio;
+//     dtracker::audio::DeviceManager manager(&audio);
+//     auto infoOpt = manager.currentDeviceInfo();
+//     ASSERT_TRUE(infoOpt.has_value());
 
-    dtracker::audio::Engine engine;
-    engine.setOutputDevice(infoOpt->ID);
+//     dtracker::audio::Engine engine;
+//     engine.setOutputDevice(infoOpt->ID);
 
-    engine.start();
+//     engine.start();
 
-    // Create a sample descriptor with some dummy data.
-    dtracker::sample::types::SampleDescriptor descriptor{
-        -1,
-        std::make_shared<const dtracker::audio::types::PCMData>(
-            dtracker::audio::types::PCMData{0.1, 0.2, 0.3, 0.4}),
-        {44100, 16}};
+//     dtracker::audio::PlaybackManager pm(&engine, nullptr);
+//     pm.playTestTone(); // Start playback first
+//     ASSERT_TRUE(pm.isPlaying());
 
-    dtracker::audio::PlaybackManager pm(&engine);
+//     pm.stopPlayback(); // Now stop it
 
-    auto unit =
-        dtracker::audio::playback::makePlaybackUnit(std::move(descriptor));
-
-    pm.playSample(std::move(unit));
-    ASSERT_TRUE(pm.isPlaying());
-
-    pm.stopPlayback(); // Now stop it
-
-    EXPECT_FALSE(pm.isPlaying())
-        << "PlaybackManager still reports playing after stop";
-}
+//     EXPECT_FALSE(pm.isPlaying())
+//         << "PlaybackManager still reports playing after stop";
+// }

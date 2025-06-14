@@ -1,29 +1,27 @@
 #pragma once
 
-#include <dtracker/audio/engine.hpp>
-#include <dtracker/audio/playback/sample_playback_unit.hpp>
-#include <dtracker/sample/manager.hpp>
-#include <dtracker/tracker/types/active_pattern.hpp>
-#include <memory>
+#include <dtracker/audio/i_engine.hpp>
+#include <dtracker/audio/i_playback_manager.hpp>
 
 namespace dtracker::audio
 {
-    class PlaybackManager
+    /// An implementation of the IEngine interface using the RtAudio
+    /// library.
+    class PlaybackManager : public IPlaybackManager
     {
       public:
-        // Constructs the manager with a reference to an existing Engine (not
-        // owned)
-        explicit PlaybackManager(Engine *engine);
+        explicit PlaybackManager(IEngine *engine);
 
-        void playSample(std::unique_ptr<playback::SamplePlaybackUnit> unit);
+        void
+        playSample(std::unique_ptr<playback::SamplePlaybackUnit> unit) override;
 
         // Stops current playback if active
-        void stopPlayback();
+        void stopPlayback() override;
 
         // Returns whether the audio stream is currently running
-        bool isPlaying() const;
+        bool isPlaying() const override;
 
       private:
-        Engine *m_engine{nullptr}; // Not owned
+        IEngine *m_engine{nullptr};
     };
 } // namespace dtracker::audio

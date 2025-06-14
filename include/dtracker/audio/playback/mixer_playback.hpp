@@ -14,7 +14,7 @@ namespace dtracker::audio::playback
         MixerPlaybackUnit() = default;
 
         // Adds a new playback unit to be mixed with others
-        void addUnit(std::unique_ptr<PlaybackUnit> unit);
+        virtual void addUnit(std::unique_ptr<PlaybackUnit> unit);
 
         // Renders audio by mixing all active units into the output buffer
         void render(float *buffer, unsigned int nFrames,
@@ -22,7 +22,8 @@ namespace dtracker::audio::playback
 
         void reset() override;
 
-        void clear();
+        // Clears the playback units from the mix
+        virtual void clear();
 
         // Returns true if no active units remain (i.e. playback is silent)
         bool isFinished() const override;

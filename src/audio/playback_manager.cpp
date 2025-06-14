@@ -4,7 +4,7 @@
 namespace dtracker::audio
 {
     // Initializes PlaybackManager with an Engine pointer
-    PlaybackManager::PlaybackManager(Engine *engine) : m_engine(engine) {}
+    PlaybackManager::PlaybackManager(IEngine *engine) : m_engine(engine) {}
 
     void dtracker::audio::PlaybackManager::playSample(
         std::unique_ptr<playback::SamplePlaybackUnit> unit)
