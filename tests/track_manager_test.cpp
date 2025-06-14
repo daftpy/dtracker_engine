@@ -7,7 +7,7 @@
 TEST(TrackManager, InitializesWithSampleManager)
 {
     dtracker::sample::Manager sampleManager;
-    dtracker::tracker::TrackManager tm(&sampleManager);
+    dtracker::tracker::TrackManager tm;
     EXPECT_TRUE(tm.allTrackIds().empty());
 }
 
@@ -15,7 +15,7 @@ TEST(TrackManager, InitializesWithSampleManager)
 TEST(TrackManager, CreatesEmptyTrack)
 {
     dtracker::sample::Manager sampleManager;
-    dtracker::tracker::TrackManager tm(&sampleManager);
+    dtracker::tracker::TrackManager tm;
     int id = tm.createTrack();
     EXPECT_TRUE(tm.getTrack(id) != nullptr);
 }
@@ -35,7 +35,7 @@ TEST(TrackManager, CreatesTrackWithSamples)
         std::make_shared<const dtracker::audio::types::PCMData>(
             dtracker::audio::types::PCMData{0.4f, 0.5f}),
         {44100, 32});
-    dtracker::tracker::TrackManager tm(&sampleManager);
+    dtracker::tracker::TrackManager tm;
     int id = tm.createTrack({s1, s2});
     auto *track = tm.getTrack(id);
     EXPECT_TRUE(track != nullptr);
@@ -46,7 +46,7 @@ TEST(TrackManager, CreatesTrackWithSamples)
 TEST(TrackManager, RemovesTrack)
 {
     dtracker::sample::Manager sampleManager;
-    dtracker::tracker::TrackManager tm(&sampleManager);
+    dtracker::tracker::TrackManager tm;
     int id = tm.createTrack();
     EXPECT_TRUE(tm.removeTrack(id));
     EXPECT_EQ(tm.getTrack(id), nullptr);
@@ -56,7 +56,7 @@ TEST(TrackManager, RemovesTrack)
 TEST(TrackManager, GetNonExistentTrackReturnsNull)
 {
     dtracker::sample::Manager sampleManager;
-    dtracker::tracker::TrackManager tm(&sampleManager);
+    dtracker::tracker::TrackManager tm;
     EXPECT_EQ(tm.getTrack(9999), nullptr);
 }
 
@@ -64,7 +64,7 @@ TEST(TrackManager, GetNonExistentTrackReturnsNull)
 TEST(TrackManager, AllTrackIdsReflectsContents)
 {
     dtracker::sample::Manager sampleManager;
-    dtracker::tracker::TrackManager tm(&sampleManager);
+    dtracker::tracker::TrackManager tm;
     int a = tm.createTrack();
     int b = tm.createTrack();
     auto ids = tm.allTrackIds();
@@ -81,7 +81,7 @@ TEST(TrackManager, CanAddSamplesToExistingTrack)
         std::make_shared<const dtracker::audio::types::PCMData>(
             dtracker::audio::types::PCMData{0.1f, 0.2f, 0.3f}),
         {44100, 32});
-    dtracker::tracker::TrackManager tm(&sampleManager);
+    dtracker::tracker::TrackManager tm;
 
     int trackId = tm.createTrack();
     EXPECT_TRUE(tm.addSamplesToTrack(trackId, {s1}));

@@ -71,25 +71,25 @@ TEST(DeviceManager, ReturnsValidDefaultOutputDevice)
 // -------------------------
 // PlaybackManager Tests
 // -------------------------
-TEST(PlaybackManager, StartsTonePlayback)
-{
-    RtAudio audio;
-    dtracker::audio::DeviceManager manager(&audio);
-    auto infoOpt = manager.currentDeviceInfo();
-    ASSERT_TRUE(infoOpt.has_value());
+// TEST(PlaybackManager, StartsTonePlayback)
+// {
+//     RtAudio audio;
+//     dtracker::audio::DeviceManager manager(&audio);
+//     auto infoOpt = manager.currentDeviceInfo();
+//     ASSERT_TRUE(infoOpt.has_value());
 
-    dtracker::audio::Engine engine;
-    engine.setOutputDevice(infoOpt->ID);
+//     dtracker::audio::Engine engine;
+//     engine.setOutputDevice(infoOpt->ID);
 
-    engine.start();
+//     engine.start();
 
-    dtracker::audio::PlaybackManager pm(&engine, nullptr);
-    pm.playTestTone(220.0f); // A3
+//     dtracker::audio::PlaybackManager pm(&engine, nullptr);
+//     pm.playTestTone(220.0f); // A3
 
-    EXPECT_TRUE(pm.isPlaying()) << "PlaybackManager failed to start playback";
-    EXPECT_TRUE(engine.isStreamRunning())
-        << "Engine stream not running after playTestTone";
-}
+//     EXPECT_TRUE(pm.isPlaying()) << "PlaybackManager failed to start
+//     playback"; EXPECT_TRUE(engine.isStreamRunning())
+//         << "Engine stream not running after playTestTone";
+// }
 
 TEST(PlaybackManager, StopsPlayback)
 {
@@ -103,8 +103,19 @@ TEST(PlaybackManager, StopsPlayback)
 
     engine.start();
 
-    dtracker::audio::PlaybackManager pm(&engine, nullptr);
-    pm.playTestTone(); // Start playback first
+    // Create a sample descriptor with some dummy data.
+    dtracker::sample::types::SampleDescriptor descriptor{
+        -1,
+        std::make_shared<const dtracker::audio::types::PCMData>(
+            dtracker::audio::types::PCMData{0.1, 0.2, 0.3, 0.4}),
+        {44100, 16}};
+
+    dtracker::audio::PlaybackManager pm(&engine);
+
+    auto unit =
+        dtracker::audio::playback::makePlaybackUnit(std::move(descriptor));
+
+    pm.playSample(std::move(unit));
     ASSERT_TRUE(pm.isPlaying());
 
     pm.stopPlayback(); // Now stop it

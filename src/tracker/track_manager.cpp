@@ -3,11 +3,6 @@
 
 namespace dtracker::tracker
 {
-    TrackManager::TrackManager(sample::Manager *sampleManager)
-        : m_sampleManager(sampleManager)
-    {
-    }
-
     // Creates a new TrackPlaybackUnit with the given sample IDs, volume, and
     // pan. Returns a unique track ID that can be used to access the created
     // track later.
@@ -22,8 +17,8 @@ namespace dtracker::tracker
         // Load and add all the requested sample playback units
         for (int id : sampleIds)
         {
-            if (!m_sampleManager)
-                continue;
+            // if (!m_sampleManager)
+            //     continue;
 
             // auto data = m_sampleManager->getSampleData(id);
             // auto unit = dtracker::audio::playback::makePlaybackUnit(data);
@@ -62,8 +57,8 @@ namespace dtracker::tracker
     {
         // Attempt to get the track
         auto *track = getTrack(trackId);
-        if (!track || !m_sampleManager)
-            return false;
+        // if (!track || !m_sampleManager)
+        //     return false;
 
         // Add the samples to the track if they exist
         for (int id : sampleIds)

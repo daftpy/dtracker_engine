@@ -9,7 +9,7 @@ namespace dtracker::tracker
     class TrackManager
     {
       public:
-        explicit TrackManager(sample::Manager *sampleManager);
+        TrackManager() = default;
 
         // Creates and stores a new track, returns its ID
         int createTrack(std::vector<int> sampleIds, float volume = 1.0f,
@@ -31,7 +31,6 @@ namespace dtracker::tracker
         std::vector<int> allTrackIds() const;
 
       private:
-        sample::Manager *m_sampleManager{nullptr};
         std::unordered_map<int,
                            std::unique_ptr<audio::playback::TrackPlaybackUnit>>
             m_tracks;
