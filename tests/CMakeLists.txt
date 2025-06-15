@@ -11,11 +11,10 @@ FetchContent_MakeAvailable(googletest)
 # Define test executable
 add_executable(audio_engine_test 
   audio_engine_test.cpp
-  track_manager_test.cpp
   unit/sample_cache_test.cpp
-  sample_manager_test.cpp
   unit/playback_manager_test.cpp
   unit/playback_units_test.cpp
+  unit/track_manager_test.cpp
   integration/engine_integration_test.cpp
 )
 

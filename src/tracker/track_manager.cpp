@@ -1,96 +1,76 @@
-#include <dtracker/audio/playback/sample_playback_unit.hpp>
-#include <dtracker/tracker/track_manager.hpp>
+#include "dtracker/tracker/track_manager.hpp"
 
 namespace dtracker::tracker
 {
-    // Creates a new TrackPlaybackUnit with the given sample IDs, volume, and
-    // pan. Returns a unique track ID that can be used to access the created
-    // track later.
-    int TrackManager::createTrack(std::vector<int> sampleIds, float volume,
-                                  float pan)
+    int TrackManager::createTrack(const std::string &name)
     {
-        // Allocate a new track
-        auto track = std::make_unique<audio::playback::TrackPlaybackUnit>();
-        track->setVolume(volume);
-        track->setPan(pan);
+        // Acquire a unique (exclusive) lock for this write operation.
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
 
-        // Load and add all the requested sample playback units
-        for (int id : sampleIds)
-        {
-            // if (!m_sampleManager)
-            //     continue;
+        // Create the new track data object, managed by a shared_ptr.
+        auto track = std::make_shared<types::Track>(name);
 
-            // auto data = m_sampleManager->getSampleData(id);
-            // auto unit = dtracker::audio::playback::makePlaybackUnit(data);
-            // if (unit)
-            //     track->addSample(std::move(unit));
-        }
-
-        // Store the track using a unique track ID
+        // Generate and assign the new unique ID.
         int id = m_nextId++;
+        track->id = id;
+
+        // Move the new track into our map.
         m_tracks[id] = std::move(track);
+
         return id;
     }
 
-    int TrackManager::createTrack(float volume, float pan)
+    std::shared_ptr<types::Track> TrackManager::getTrack(int id)
     {
-        auto track = std::make_unique<audio::playback::TrackPlaybackUnit>();
-        track->setVolume(volume);
-        track->setPan(pan);
+        std::shared_lock<std::shared_mutex> lock(m_mutex);
 
-        int id = m_nextId++;
-        m_tracks[id] = std::move(track);
-        return id;
-    }
-
-    // Returns a pointer to the track with the given ID, or nullptr if not
-    // found.
-    audio::playback::TrackPlaybackUnit *TrackManager::getTrack(int id)
-    {
-        auto it = m_tracks.find(id);
-        return (it != m_tracks.end()) ? it->second.get() : nullptr;
-    }
-
-    // Adds a list of samples to a specified track
-    bool TrackManager::addSamplesToTrack(int trackId,
-                                         const std::vector<int> &sampleIds)
-    {
-        // Attempt to get the track
-        auto *track = getTrack(trackId);
-        // if (!track || !m_sampleManager)
-        //     return false;
-
-        // Add the samples to the track if they exist
-        for (int id : sampleIds)
+        if (auto it = m_tracks.find(id); it != m_tracks.end())
         {
-            // auto unit = m_sampleManager->getSample(id);
-            // auto data = m_sampleManager->getSampleData(id);
-            // if (!data)
-            return false;
-
-            // auto unit = audio::playback::makePlaybackUnit(data);
-            // if (unit)
-            //     track->addSample(std::move(unit));
+            return it->second;
         }
 
-        return true;
+        return nullptr;
     }
 
-    // Removes a track by ID. Returns true if the track was removed, false if it
-    // didn't exist.
+    bool TrackManager::addPatternToTrack(int trackId,
+                                         const types::ActivePattern &pattern)
+    {
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
+
+        auto it = m_tracks.find(trackId);
+        if (it != m_tracks.end())
+        {
+            // Get the shared_ptr to the track.
+            auto &trackPtr = it->second;
+
+            // Add a copy of the pattern to the track's pattern sequence.
+            trackPtr->patterns.push_back(pattern);
+
+            return true;
+        }
+
+        return false; // Track with the given ID was not found.
+    }
+
     bool TrackManager::removeTrack(int id)
     {
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
         return m_tracks.erase(id) > 0;
     }
 
-    // Returns a list of all current track IDs managed by this TrackManager.
-    std::vector<int> TrackManager::allTrackIds() const
+    std::vector<int> TrackManager::getAllTrackIds() const
     {
+        std::shared_lock<std::shared_mutex> lock(m_mutex);
+
         std::vector<int> ids;
+        // Pre-allocate vector memory.
         ids.reserve(m_tracks.size());
 
+        // Get all the IDs.
         for (const auto &[id, _] : m_tracks)
+        {
             ids.push_back(id);
+        }
 
         return ids;
     }

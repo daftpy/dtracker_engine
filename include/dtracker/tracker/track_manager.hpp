@@ -1,40 +1,46 @@
 #pragma once
-#include <dtracker/audio/playback/track_playback_unit.hpp>
-#include <dtracker/sample/manager.hpp>
+
+#include "i_track_manager.hpp"
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
+#include <vector>
 
 namespace dtracker::tracker
 {
-    class TrackManager
+    /// A thread-safe, concrete implementation of the ITrackManager interface.
+    class TrackManager : public ITrackManager
     {
       public:
         TrackManager() = default;
+        ~TrackManager() override = default;
 
-        // Creates and stores a new track, returns its ID
-        int createTrack(std::vector<int> sampleIds, float volume = 1.0f,
-                        float pan = 0.0f);
+        /// Creates a new, empty track and returns its unique ID.
+        int createTrack(const std::string &name = "New Track") override;
 
-        // Creates and stores a new empty track, returns its ID
-        int createTrack(float volume = 1.0f, float pan = 0.0f);
+        /// Retrieves a shared, thread-safe handle to a track's data.
+        std::shared_ptr<types::Track> getTrack(int id) override;
 
-        // Retrieves a raw pointer to a track by ID (or nullptr if not found)
-        audio::playback::TrackPlaybackUnit *getTrack(int id);
+        /// Adds a pattern to the end of a specific track's sequence.
+        bool addPatternToTrack(int trackId,
+                               const types::ActivePattern &pattern) override;
 
-        // Adds one or more samples to an existing track by ID
-        bool addSamplesToTrack(int trackId, const std::vector<int> &sampleIds);
+        /// Removes a track from the manager.
+        bool removeTrack(int id) override;
 
-        // Optional: remove a track
-        bool removeTrack(int id);
-
-        // Returns all track IDs
-        std::vector<int> allTrackIds() const;
+        /// Returns a copy of all currently registered track IDs.
+        std::vector<int> getAllTrackIds() const override;
 
       private:
-        std::unordered_map<int,
-                           std::unique_ptr<audio::playback::TrackPlaybackUnit>>
-            m_tracks;
-        int m_nextId = 0;
+        // The container for all track data, keyed by unique ID.
+        std::unordered_map<int, std::shared_ptr<types::Track>> m_tracks;
+
+        // The counter for the next available track ID.
+        int m_nextId{0};
+
+        // A mutex to ensure thread-safe access to the tracks map.
+        mutable std::shared_mutex m_mutex;
     };
 
 } // namespace dtracker::tracker
