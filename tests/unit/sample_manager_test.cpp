@@ -4,9 +4,8 @@
 #include <dtracker/sample/manager.hpp>
 #include <memory>
 #include <string>
-#include <thread> // Required for concurrency test
+#include <thread>
 #include <vector>
-
 
 // Verifies that each call to addSample returns a new, unique ID.
 TEST(SampleManager, AddReturnsUniqueIds)

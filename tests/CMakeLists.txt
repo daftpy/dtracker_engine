@@ -12,7 +12,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(audio_engine_test 
   audio_engine_test.cpp
   track_manager_test.cpp
-  sample_cache_test.cpp
+  unit/sample_cache_test.cpp
   sample_manager_test.cpp
   unit/playback_manager_test.cpp
   unit/playback_units_test.cpp
