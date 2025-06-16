@@ -59,6 +59,13 @@ namespace dtracker::audio::playback
         return m_descriptor.metadata().sourceSampleRate;
     }
 
+    void dtracker::audio::playback::SamplePlaybackUnit::reinitialize(
+        const dtracker::sample::types::SampleDescriptor &descriptor)
+    {
+        m_descriptor = descriptor;
+        reset();
+    }
+
     std::unique_ptr<SamplePlaybackUnit>
     makePlaybackUnit(sample::types::SampleDescriptor descriptor)
     {

@@ -39,6 +39,9 @@ namespace dtracker::audio::playback
          */
         void reset() override;
 
+        void reinitialize(
+            const dtracker::sample::types::SampleDescriptor &descriptor);
+
         /**
          * Returns a read-only reference to the sample data buffer.
          */
