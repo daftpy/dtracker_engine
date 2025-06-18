@@ -7,56 +7,53 @@
 
 namespace dtracker::audio::playback
 {
-    /**
-     * SamplePlaybackUnit plays back audio from a shared SampleData buffer.
-     * It is safe to have multiple units reading the same SampleData in
-     * parallel.
-     */
+    /// A playback unit that plays a single, non-looping audio sample from a
+    /// buffer. It keeps track of its own playback position and reports when
+    /// it's finished.
     class SamplePlaybackUnit : public PlaybackUnit
     {
       public:
-        /**
-         * Constructs a SamplePlaybackUnit using a shared SampleData buffer.
-         * The data is assumed to be stereo interleaved and even-length.
-         */
-        // explicit SamplePlaybackUnit(std::shared_ptr<const SampleData> data);
+        /// Default constructor for pre-allocation in an object pool.
+        SamplePlaybackUnit();
+
+        /// Constructs and initializes the unit with a specific sample
+        /// descriptor.
         explicit SamplePlaybackUnit(sample::types::SampleDescriptor descriptor);
 
-        /**
-         * Renders audio from the sample buffer into the output buffer.
-         * Will mix or write into the output depending on remaining data.
-         */
+        /// Renders the next chunk of audio from the sample buffer.
         void render(float *buffer, unsigned int frames,
                     unsigned int channels) override;
 
-        /**
-         * Returns true if all samples have been played back.
-         */
+        /// Returns true if the playback position has reached the end of the
+        /// sample.
         bool isFinished() const override;
 
-        /**
-         * Resets playback to the beginning of the sample.
-         */
+        /// Resets the playback position to the beginning of the sample.
         void reset() override;
 
+        /// Re-initializes a recycled unit with a new sample for playback.
         void reinitialize(
             const dtracker::sample::types::SampleDescriptor &descriptor);
 
-        /**
-         * Returns a read-only reference to the sample data buffer.
-         */
+        /// Gets a const reference to the underlying PCM audio data.
         const std::vector<float> &data() const;
 
-        /**
-         * Returns the sample rate associated with this sample.
-         */
+        /// Gets the sample rate of the audio data.
         unsigned int sampleRate() const;
 
+        /// A public flag for debugging to track pool checkout status.
+        bool isCheckedOut{false};
+
       private:
+        /// Holds the shared pointer to the PCM data and its metadata.
         sample::types::SampleDescriptor m_descriptor;
-        size_t m_position = 0; // Current playback position (sample index)
+        /// The current read position in the sample, measured in total samples
+        /// (not frames).
+        size_t m_position = 0;
     };
 
+    /// A factory function for easily creating a unique_ptr to a
+    /// SamplePlaybackUnit.
     std::unique_ptr<SamplePlaybackUnit>
     makePlaybackUnit(sample::types::SampleDescriptor descriptor);
 

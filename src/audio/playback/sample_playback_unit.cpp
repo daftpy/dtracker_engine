@@ -4,9 +4,15 @@
 
 namespace dtracker::audio::playback
 {
-    dtracker::audio::playback::SamplePlaybackUnit::SamplePlaybackUnit(
+    SamplePlaybackUnit::SamplePlaybackUnit()
+        : m_descriptor({}), m_position(0), isCheckedOut(false)
+    {
+    }
+
+    SamplePlaybackUnit::SamplePlaybackUnit(
         sample::types::SampleDescriptor descriptor)
-        : m_descriptor(std::move(descriptor))
+        : m_descriptor(std::move(descriptor)), m_position(0),
+          isCheckedOut(false)
     {
     }
 
@@ -62,6 +68,7 @@ namespace dtracker::audio::playback
     void dtracker::audio::playback::SamplePlaybackUnit::reinitialize(
         const dtracker::sample::types::SampleDescriptor &descriptor)
     {
+        // Get the new scriptor and reset the position
         m_descriptor = descriptor;
         reset();
     }

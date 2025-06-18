@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-
 namespace dtracker::sample::types
 {
     struct CacheEntry
@@ -28,6 +27,7 @@ namespace dtracker::sample::types
     class SampleDescriptor
     {
       public:
+        SampleDescriptor() = default;
         SampleDescriptor(
             int id, const std::shared_ptr<const audio::types::PCMData> pcmData,
             const SampleMetadata &metadata)
