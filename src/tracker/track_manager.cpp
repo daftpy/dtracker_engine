@@ -1,5 +1,7 @@
 #include "dtracker/tracker/track_manager.hpp"
 
+#include <iostream>
+
 namespace dtracker::tracker
 {
     int TrackManager::createTrack(const std::string &name)
@@ -56,6 +58,24 @@ namespace dtracker::tracker
     {
         std::unique_lock<std::shared_mutex> lock(m_mutex);
         return m_tracks.erase(id) > 0;
+    }
+
+    bool dtracker::tracker::TrackManager::updateTrackPatterns(
+        int trackId,
+        const std::vector<dtracker::tracker::types::ActivePattern> &patterns)
+    {
+        // Use a unique_lock as this is a write operation.
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
+
+        auto it = m_tracks.find(trackId);
+        if (it != m_tracks.end())
+        {
+            std::cout << "Updating track pattern\n";
+            // Get the shared_ptr to the track and update its patterns.
+            it->second->patterns = patterns;
+            return true;
+        }
+        return false; // Track not found.
     }
 
     std::vector<int> TrackManager::getAllTrackIds() const

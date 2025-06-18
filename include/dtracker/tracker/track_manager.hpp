@@ -29,6 +29,11 @@ namespace dtracker::tracker
         /// Removes a track from the manager.
         bool removeTrack(int id) override;
 
+        bool updateTrackPatterns(
+            int trackId,
+            const std::vector<dtracker::tracker::types::ActivePattern>
+                &patterns) override;
+
         /// Returns a copy of all currently registered track IDs.
         std::vector<int> getAllTrackIds() const override;
 

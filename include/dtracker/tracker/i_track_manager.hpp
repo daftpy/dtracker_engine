@@ -36,6 +36,13 @@ namespace dtracker::tracker
         /// @return True if the track existed and was removed.
         virtual bool removeTrack(int id) = 0;
 
+        /// Replaces the pattern sequence for a given track.
+        /// @return True if the track was found and updated.
+        virtual bool updateTrackPatterns(
+            int trackId,
+            const std::vector<dtracker::tracker::types::ActivePattern>
+                &patterns) = 0;
+
         /// Returns a copy of all currently registered track IDs.
         virtual std::vector<int> getAllTrackIds() const = 0;
     };
