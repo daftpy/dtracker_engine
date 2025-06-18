@@ -34,23 +34,23 @@ namespace dtracker::audio
     void dtracker::audio::PlaybackManager::playSample(
         const sample::types::SampleDescriptor &descriptor)
     {
-        // // Ensure the engine dependency is valid.
-        // if (!m_engine)
-        //     return;
+        // Ensure the engine dependency is valid.
+        if (!m_engine)
+            return;
 
-        // // 1. Acquire a recycled player from the pool. This is fast and
-        // // allocation-free.
-        // auto unitPtr = m_unitPool.acquire();
+        // Acquire a recycled player from the pool. This is fast and
+        // allocation-free.
+        auto unitPtr = m_unitPool.acquire();
 
-        // // 2. Check if the pool had an available object.
-        // if (unitPtr)
-        // {
-        //     // 3. Re-initialize the recycled player with the new sample's
-        //     data. unitPtr->reinitialize(descriptor);
+        // Check if the pool had an available object.
+        if (unitPtr)
+        {
+            // Re-initialize the recycled player with the new sample's data.
+            unitPtr->reinitialize(descriptor);
 
-        //     // 4. Add the ready-to-go unit to the mixer for playback.
-        //     m_engine->mixerUnit()->addUnit(std::move(unitPtr));
-        // }
+            // Add the ready-to-go unit to the mixer for playback.
+            m_engine->mixerUnit()->addUnit(std::move(unitPtr));
+        }
     }
 
 } // namespace dtracker::audio
