@@ -11,7 +11,7 @@ class MockMixerPlaybackUnit
 {
   public:
     void addUnit(
-        std::unique_ptr<dtracker::audio::playback::PlaybackUnit> unit) override
+        std::shared_ptr<dtracker::audio::playback::PlaybackUnit> unit) override
     {
         m_units.push_back(std::move(unit));
     }
@@ -34,6 +34,6 @@ class MockMixerPlaybackUnit
     }
 
   private:
-    std::vector<std::unique_ptr<dtracker::audio::playback::PlaybackUnit>>
+    std::vector<std::shared_ptr<dtracker::audio::playback::PlaybackUnit>>
         m_units;
 };

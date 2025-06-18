@@ -44,10 +44,14 @@ namespace dtracker::audio::playback
 
         unit->isCheckedOut = true;
 
+        auto deleter = [this](SamplePlaybackUnit *returnedUnit)
+        { this->release(returnedUnit); };
+
         // Return the raw pointer wrapped in a unique_ptr that uses a custom
         // deleter.
-        return PooledUnitPtr(unit,
-                             [this](SamplePlaybackUnit *u) { release(u); });
+        // return PooledUnitPtr(unit,
+        //                      [this](SamplePlaybackUnit *u) { release(u); });
+        return std::shared_ptr<SamplePlaybackUnit>(unit, deleter);
     }
 
     // Returns a unit's pointer back to the free list.

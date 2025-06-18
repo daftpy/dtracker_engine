@@ -14,7 +14,7 @@ namespace dtracker::audio::playback
         MixerPlaybackUnit() = default;
 
         // Adds a new playback unit to be mixed with others
-        virtual void addUnit(std::unique_ptr<PlaybackUnit> unit);
+        virtual void addUnit(std::shared_ptr<PlaybackUnit> unit);
 
         // Renders audio by mixing all active units into the output buffer
         void render(float *buffer, unsigned int nFrames,
@@ -30,6 +30,6 @@ namespace dtracker::audio::playback
 
       private:
         // Holds all active playback units being mixed
-        std::vector<std::unique_ptr<PlaybackUnit>> m_units;
+        std::vector<std::shared_ptr<PlaybackUnit>> m_units;
     };
 } // namespace dtracker::audio::playback

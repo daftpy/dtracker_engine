@@ -15,9 +15,7 @@ namespace dtracker::audio::playback
       public:
         /// A unique_ptr that automatically returns its object to the pool
         /// when its scope ends, thanks to a custom deleter.
-        using PooledUnitPtr =
-            std::unique_ptr<SamplePlaybackUnit,
-                            std::function<void(SamplePlaybackUnit *)>>;
+        using PooledUnitPtr = std::shared_ptr<SamplePlaybackUnit>;
 
         /// Creates a pool with a fixed number of pre-allocated units.
         /// @param size The number of SamplePlaybackUnits to create up front.

@@ -6,7 +6,7 @@ namespace dtracker::audio::playback
 {
 
     // Adds a new playback unit to the internal list
-    void MixerPlaybackUnit::addUnit(std::unique_ptr<PlaybackUnit> unit)
+    void MixerPlaybackUnit::addUnit(std::shared_ptr<PlaybackUnit> unit)
     {
         m_units.push_back(std::move(unit));
     }
