@@ -21,6 +21,10 @@ namespace dtracker::audio
 
         /// Returns true if any audio is currently playing through the engine.
         virtual bool isPlaying() const = 0;
+
+        /// Acquires a unit from the pool, reinitializes it, and plays it.
+        virtual void
+        playSample(const sample::types::SampleDescriptor &descriptor) = 0;
     };
 
 } // namespace dtracker::audio

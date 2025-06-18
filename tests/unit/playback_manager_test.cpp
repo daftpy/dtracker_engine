@@ -2,11 +2,11 @@
 
 #include "mocks/mock_engine.hpp"
 #include "mocks/mock_mixer_playback_unit.hpp"
+#include "mocks/mock_sample_manager.hpp"
 #include <dtracker/audio/playback/sample_playback_unit.hpp>
 #include <dtracker/audio/playback_manager.hpp>
 #include <dtracker/sample/types.hpp>
 #include <memory>
-
 
 // --- Test Fixture ---
 // This class sets up a fresh environment for each test case.
@@ -20,7 +20,8 @@ class PlaybackManagerTest : public ::testing::Test
         engine.start();
 
         // Create the PlaybackManager for testing and inject the MockEngine.
-        pm = std::make_unique<dtracker::audio::PlaybackManager>(&engine);
+        pm = std::make_unique<dtracker::audio::PlaybackManager>(
+            &engine, &m_mockSampleManager);
     }
 
     // Helper function to create a dummy sample unit for testing playback.
@@ -36,10 +37,9 @@ class PlaybackManagerTest : public ::testing::Test
     }
 
     MockEngine engine;
+    MockSampleManager m_mockSampleManager;
     std::unique_ptr<dtracker::audio::PlaybackManager> pm;
 };
-
-// --- The Tests ---
 
 // Test that a newly created manager correctly reports it is not playing.
 TEST_F(PlaybackManagerTest, IsNotPlayingInitially)
