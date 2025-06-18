@@ -21,7 +21,7 @@ class PlaybackManagerTest : public ::testing::Test
 
         // Create the PlaybackManager for testing and inject the MockEngine.
         pm = std::make_unique<dtracker::audio::PlaybackManager>(
-            &engine, &m_mockSampleManager);
+            &engine, &m_mockSampleManager, nullptr);
     }
 
     // Helper function to create a dummy sample unit for testing playback.

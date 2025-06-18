@@ -188,4 +188,10 @@ namespace dtracker::audio
         return m_mixerUnit.get();
     }
 
+    const types::AudioSettings &dtracker::audio::Engine::getSettings() const
+    {
+        // TODO: insert return statement here
+        return m_settings;
+    }
+
 } // namespace dtracker::audio

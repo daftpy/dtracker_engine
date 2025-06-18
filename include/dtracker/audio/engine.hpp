@@ -28,6 +28,7 @@ namespace dtracker::audio
         void setOutputDevice(unsigned int deviceId) override;
         playback::MixerPlaybackUnit *mixerUnit() override;
         DeviceManager createDeviceManager() const override;
+        types::AudioSettings const &getSettings() const override;
 
         // --- Engine-Specific Public Methods ---
         // These provide lower-level access not part of the general IEngine

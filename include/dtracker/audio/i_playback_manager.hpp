@@ -25,6 +25,9 @@ namespace dtracker::audio
         /// Acquires a unit from the pool, reinitializes it, and plays it.
         virtual void
         playSample(const sample::types::SampleDescriptor &descriptor) = 0;
+
+        /// Prepares and starts playback of an entire track by its ID.
+        virtual void playTrack(int trackId) = 0;
     };
 
 } // namespace dtracker::audio

@@ -4,6 +4,7 @@
 #include <dtracker/audio/i_playback_manager.hpp>
 #include <dtracker/audio/playback/unit_pool.hpp>
 #include <dtracker/sample/i_manager.hpp>
+#include <dtracker/tracker/i_track_manager.hpp>
 
 namespace dtracker::audio
 {
@@ -13,7 +14,8 @@ namespace dtracker::audio
     {
       public:
         explicit PlaybackManager(IEngine *engine,
-                                 sample::IManager *sampleManager);
+                                 sample::IManager *sampleManager,
+                                 tracker::ITrackManager *trackManager);
 
         void
         playSample(std::unique_ptr<playback::SamplePlaybackUnit> unit) override;
@@ -27,9 +29,17 @@ namespace dtracker::audio
         /// Acquires a unit from the pool, reinitializes it, and plays it.
         void playSample(const sample::types::SampleDescriptor &descriptor);
 
+        void playTrack(int trackId) override;
+
+        /// Sets whether playback should loop or play once.
+        void setLooping(bool shouldLoop);
+
       private:
+        bool m_isLooping{true};
+
         IEngine *m_engine{nullptr};
         sample::IManager *m_sampleManager{nullptr};
+        tracker::ITrackManager *m_trackManager{nullptr};
 
         playback::UnitPool m_unitPool;
     };

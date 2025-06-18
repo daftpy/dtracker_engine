@@ -4,7 +4,6 @@
 #include <dtracker/audio/playback/mixer_playback.hpp>
 #include <optional>
 
-
 namespace dtracker::audio
 {
     /// Defines the public contract for the core audio engine.
@@ -35,6 +34,8 @@ namespace dtracker::audio
 
         /// Creates a helper object for querying available audio devices.
         virtual DeviceManager createDeviceManager() const = 0;
+
+        virtual const types::AudioSettings &getSettings() const = 0;
     };
 
 } // namespace dtracker::audio
