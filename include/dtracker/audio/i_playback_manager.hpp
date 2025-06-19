@@ -28,6 +28,8 @@ namespace dtracker::audio
 
         /// Prepares and starts playback of an entire track by its ID.
         virtual void playTrack(int trackId) = 0;
+
+        virtual void setLooping(bool shouldLoop) = 0;
     };
 
 } // namespace dtracker::audio
