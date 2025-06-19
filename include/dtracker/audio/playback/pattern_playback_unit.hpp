@@ -42,6 +42,8 @@ namespace dtracker::audio::playback
         /// AND all of its triggered notes have finished their playback.
         bool isFinished() const override;
 
+        virtual bool hasFinishedLoop() const;
+
         /// Resets the pattern to its initial state, ready to be played again.
         void reset() override;
 

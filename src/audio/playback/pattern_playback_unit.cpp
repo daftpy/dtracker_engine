@@ -1,5 +1,6 @@
 #include <algorithm> // For std::fill
 #include <dtracker/audio/playback/pattern_playback_unit.hpp>
+#include <iostream>
 #include <vector>
 
 namespace dtracker::audio::playback
@@ -31,53 +32,59 @@ namespace dtracker::audio::playback
         // --- 1. SCHEDULING LOGIC ---
         // Only schedule new notes if the pattern hasn't completed its first
         // full loop.
-        if (!m_hasFinishedOneLoop)
+
+        // Use the render call as a high-precision timer.
+        float deltaTimeMs =
+            (static_cast<float>(nFrames) / m_sampleRate) * 1000.0f;
+        m_pattern.elapsedMs += deltaTimeMs;
+
+        // Get all the steps that fall within the current time window, use the
+        // blue print to recyce playback units and add them to active notes
+        // Note: Only build notes when the currentStep reader is <
+        // pattern.steps.size() When the playback manager is looping, it'll
+        // reset the current step to start this process again
+        while (m_pattern.elapsedMs >= m_pattern.stepIntervalMs &&
+               m_pattern.currentStep < m_pattern.steps.size())
         {
-            // Use the render call as a high-precision timer.
-            float deltaTimeMs =
-                (static_cast<float>(nFrames) / m_sampleRate) * 1000.0f;
-            m_pattern.elapsedMs += deltaTimeMs;
+            // Get the sample to play
+            int sampleIdToPlay = m_pattern.steps[m_pattern.currentStep];
 
-            // Trigger all steps that fall within the current time window.
-            while (m_pattern.elapsedMs >= m_pattern.stepIntervalMs)
+            if (sampleIdToPlay >= 0) // A non-negative ID is a note, not a rest.
             {
-                int sampleIdToPlay = m_pattern.steps[m_pattern.currentStep];
-
-                if (sampleIdToPlay >=
-                    0) // A non-negative ID is a note, not a rest.
+                // Look up the sample's data in our pre-built blueprint.
+                auto blueprintIt = m_blueprint.find(sampleIdToPlay);
+                if (blueprintIt != m_blueprint.end())
                 {
-                    // Look up the sample's data in our pre-built blueprint.
-                    auto blueprintIt = m_blueprint.find(sampleIdToPlay);
-                    if (blueprintIt != m_blueprint.end())
+                    // Acquire a recycled player from the pool (fast and
+                    // allocation-free).
+                    auto unitPtr = m_sampleUnitPool->acquire();
+                    if (unitPtr)
                     {
-                        // Acquire a recycled player from the pool (fast and
-                        // allocation-free).
-                        auto unitPtr = m_sampleUnitPool->acquire();
-                        if (unitPtr)
-                        {
-                            // Configure the recycled player with the correct
-                            // sample data.
-                            unitPtr->reinitialize(blueprintIt->second);
-                            // Add it to our internal list of notes that are
-                            // currently playing.
-                            m_activeNotes.push_back(std::move(unitPtr));
-                        }
+                        // Configure the recycled player with the correct
+                        // sample data.
+                        unitPtr->reinitialize(blueprintIt->second);
+                        // Add it to our internal list of notes that are
+                        // currently playing.
+                        m_activeNotes.push_back(std::move(unitPtr));
                     }
                 }
-
-                // Advance the sequencer state for the next step.
-                m_pattern.currentStep++;
-                if (m_pattern.currentStep >= m_pattern.steps.size())
-                {
-                    m_pattern.currentStep = 0;
-                    m_hasFinishedOneLoop =
-                        true; // Mark that a full cycle is complete.
-
-                    // FIXES THE CLICK, but doesnt seem to fix tail ring issue
-                    m_activeNotes.clear();
-                }
-                m_pattern.elapsedMs -= m_pattern.stepIntervalMs;
             }
+
+            // Advance the sequencer state for the next step.
+            m_pattern.currentStep++;
+
+            // If we process the last step, mark that we have looped once.
+            if (m_pattern.currentStep >= m_pattern.steps.size() &&
+                !m_hasFinishedOneLoop)
+            {
+                // Let the track playback unit reset the current step
+                // m_pattern.currentStep = 0;
+                m_hasFinishedOneLoop = true;
+
+                std::cout << "elapsed time " << m_pattern.elapsedMs << "\n";
+            }
+            // Prevents jitter
+            m_pattern.elapsedMs -= m_pattern.stepIntervalMs;
         }
 
         // --- 2. MIXING LOGIC ---
@@ -109,7 +116,7 @@ namespace dtracker::audio::playback
             if ((*it)->isFinished())
             {
                 // Erasing the shared_ptr triggers its custom deleter, which
-                // automatically returns the object to the UnitPool.
+                // returns the object to the UnitPool.
                 it = m_activeNotes.erase(it);
             }
             else
@@ -120,23 +127,25 @@ namespace dtracker::audio::playback
     }
 
     // Resets the pattern to its initial state.
+    // Do not clear the m_activeNotes to sustain tails from the end of the
+    // pattern into the beginning on loops.
     void PatternPlaybackUnit::reset()
     {
         m_pattern.currentStep = 0;
         m_pattern.elapsedMs = 0.0f;
         m_hasFinishedOneLoop = false;
-        // Clear any notes that were still playing out.
-        m_activeNotes.clear();
     }
 
     // The pattern is only truly finished after it has completed its sequence
     // AND all the notes it triggered have finished their playback (the "tail").
     bool PatternPlaybackUnit::isFinished() const
     {
-        // Loops, but sustains tails
-        // return m_hasFinishedOneLoop && m_activeNotes.empty();
+        return m_hasFinishedOneLoop && m_activeNotes.empty();
+    }
 
-        // Loops, better, but clicks bad between loops
+    // Informs whether the pattern has finished sequencing one loop
+    bool dtracker::audio::playback::PatternPlaybackUnit::hasFinishedLoop() const
+    {
         return m_hasFinishedOneLoop;
     }
 

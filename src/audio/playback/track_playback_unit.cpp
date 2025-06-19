@@ -6,7 +6,7 @@
 namespace dtracker::audio::playback
 {
     // Renamed from addSample to addUnit to be more generic.
-    void TrackPlaybackUnit::addUnit(std::unique_ptr<PlaybackUnit> unit)
+    void TrackPlaybackUnit::addUnit(std::unique_ptr<PatternPlaybackUnit> unit)
     {
         if (unit)
             m_units.push_back(std::move(unit));
@@ -27,7 +27,7 @@ namespace dtracker::audio::playback
                                    unsigned int channels)
     {
         // First, check if we've already finished the entire sequence.
-        if (isFinished())
+        if (isFinished() || m_units.size() == 0)
         {
             std::fill(buffer, buffer + nFrames * channels, 0.0f);
             return;
@@ -35,25 +35,7 @@ namespace dtracker::audio::playback
 
         // Get the current pattern.
         auto &currentUnit = m_units[m_currentUnitIndex];
-
-        // Check if the current unit finished on the LAST frame.
-        if (currentUnit->isFinished())
-        {
-            currentUnit->reset();
-            m_currentUnitIndex++;
-
-            // After advancing, check again if we are now finished.
-            if (isFinished())
-            {
-                std::fill(buffer, buffer + nFrames * channels, 0.0f);
-                return;
-            }
-        }
-
-        // Now we are guaranteed to have the correct current unit for this
-        // frame. Re-acquire the pointer in case the index changed.
-        auto &unitToRender = m_units[m_currentUnitIndex];
-        unitToRender->render(buffer, nFrames, channels);
+        currentUnit->render(buffer, nFrames, channels);
 
         // --- Apply this track's own volume and pan to the pattern's output ---
         if (channels == 2)
@@ -69,21 +51,25 @@ namespace dtracker::audio::playback
         }
 
         // --- Check if the current pattern has finished its loop ---
-        if (currentUnit->isFinished())
+        if (currentUnit->hasFinishedLoop())
         {
-            // It's done, so reset it (for potential future looping of the whole
-            // track) and advance our sequence to the next pattern.
-            currentUnit->reset();
-            m_currentUnitIndex++;
-
-            // If we've just moved past the end of our pattern list...
-            if (m_currentUnitIndex >= m_units.size())
+            // ...and looping is on, reset the index back to the beginning.
+            if (m_isLooping)
             {
-                // ...and looping is on, reset the index back to the beginning.
-                if (m_isLooping)
-                {
-                    m_currentUnitIndex = 0;
-                }
+                // Reset the current pattern unit
+                currentUnit->reset();
+
+                // Stick to the same/first pattern
+                m_currentUnitIndex = 0;
+            }
+            // If we have more patterns to play
+            else if (m_currentUnitIndex < m_units.size() - 1)
+            {
+                // Reset the current pattern unit
+                currentUnit->reset();
+
+                // Move to the next pattern unit
+                m_currentUnitIndex++;
             }
         }
     }
@@ -105,7 +91,10 @@ namespace dtracker::audio::playback
     {
         // The track is finished once it has played all the patterns in its
         // sequence.
-        return m_currentUnitIndex >= m_units.size();
+        return m_currentUnitIndex >= m_units.size() - 1 &&
+               m_units[m_currentUnitIndex]
+                   ->isFinished(); // ensure the current pattern is done
+                                   // rendering before reporting finished
     }
 
     void TrackPlaybackUnit::setLooping(bool shouldLoop)

@@ -84,7 +84,7 @@ namespace dtracker::audio
             std::make_unique<playback::TrackPlaybackUnit>();
         trackPlaybackUnit->setVolume(trackDataPtr->volume);
         trackPlaybackUnit->setPan(trackDataPtr->pan);
-        trackPlaybackUnit->setLooping(true);
+        trackPlaybackUnit->setLooping(m_isLooping);
 
         // 3. Build a single "blueprint" containing all unique samples needed
         // for the entire track.
