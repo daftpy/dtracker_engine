@@ -20,6 +20,16 @@ The engine is built with a layered architecture that emphasizes testability and 
 
   - `PlaybackManager`: The high-level API for controlling all playback (previews, patterns, tracks).
 
+### Hierarchical Playback Graph
+Audio playback is handled by a compositional graph of `PlaybackUnit` objects.
+
+-   `Engine` -> owns a master -> `MixerPlaybackUnit`
+    -   `MixerPlaybackUnit` -> can contain -> `TrackPlaybackUnit`(s)
+        -   `TrackPlaybackUnit` -> can contain a sequence of -> `PatternPlaybackUnit`(s)
+            -   `PatternPlaybackUnit` -> triggers -> `SamplePlaybackUnit`(s)
+
+This hierarchy allows complex arrangements to be built from simple, reusable parts. A `TrackPlaybackUnit` applies track-level effects (volume/pan) to the output of the pattern it's currently playing.
+
 ## Features
 
 - **C++17 Design** Utilizes smart pointers and move semantics when possible to prevent memory errors and improve efficiency.
@@ -35,6 +45,7 @@ While the core playback engine is robust and functional, several key features ar
 -   **Effects Processing:** Implementing a basic effects chain (e.g., Delay, Filter) for each track.
 -   **MIDI Input:** Adding support for real-time MIDI keyboard input to trigger samples.
 -   **Offline Rendering:** A feature to export the final mix to a `.wav` file.
+-   **Architectural Refinements:** Investigating moving the master clock out of individual playback units and into the `PlaybackManager` to handle global song-level synchronization.
 
 ## Requirements
 
