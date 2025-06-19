@@ -9,7 +9,7 @@ The engine is built with a layered architecture that emphasizes testability and 
 
 - **Real-Time Safety:** The engine uses a custom **Object Pool** to pre-allocate and recycle audio players (`SamplePlaybackUnit`s). This eliminates dynamic memory allocation on the critical audio thread, preventing audio glitches and ensuring stable performance.
 
-- **Sample Instancing:** The `SampleManager` separates the concept of raw audio samples stored in the cache and the instances stored in the manager. This allows hundreds of soounds in a project to efficient share thee same underlying audio data safely.
+- **Sample Instancing:** The `SampleManager` separates the concept of raw audio samples stored in the cache and the instances stored in the manager. This allows hundreds of sounds in a project to efficiently share the same underlying audio data safely.
 
 - **Component Layers:** The system is organized into clear service layers:
   - `Engine`: The low-level service that communicates with `RtAudio`.
@@ -32,9 +32,9 @@ This hierarchy allows complex arrangements to be built from simple, reusable par
 
 ## Features
 
-- **C++17 Design** Utilizes smart pointers and move semantics when possible to prevent memory errors and improve efficiency.
+- **C++17 Design** Utilizes smart pointers and move semantics, when possible, to prevent memory errors and improve efficiency.
 - **Decoupled Architecture:** Core components are abstracted behind interfaces for improved flexibility and testability.
-- **Thread-Safe Sample Managemeent:** A central manager with LRU cache provides efficient and shared access to audio data.
+- **Thread-Safe Sample Management:** A central manager with LRU cache provides efficient and shared access to audio data.
 - **Comprehensive Test Suite:** Built with GoogleTest and a clean separation between unit and integration tests.
 
 ## Roadmap / Future Work
