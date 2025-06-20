@@ -20,7 +20,8 @@ namespace dtracker::audio::playback
 
     // Performs one block of processing. This is the heart of the sequencer.
     void PatternPlaybackUnit::render(float *buffer, unsigned int nFrames,
-                                     unsigned int channels)
+                                     unsigned int channels,
+                                     const types::RenderContext &context)
     {
         // Ensure we have the tools we need to work.
         if (!m_sampleUnitPool || m_pattern.steps.empty())
@@ -104,7 +105,7 @@ namespace dtracker::audio::playback
         for (auto it = m_activeNotes.begin(); it != m_activeNotes.end();)
         {
             // Render the note into the temporary buffer.
-            (*it)->render(temp.data(), nFrames, channels);
+            (*it)->render(temp.data(), nFrames, channels, context);
 
             // Additively mix the note's audio into our main output buffer.
             for (unsigned int i = 0; i < nFrames * channels; ++i)

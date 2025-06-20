@@ -1,4 +1,5 @@
 #pragma once
+#include <dtracker/audio/types.hpp>
 
 namespace dtracker::audio::playback
 {
@@ -28,7 +29,8 @@ namespace dtracker::audio::playback
          * renderers should do their part by writing or mixing into it.
          */
         virtual void render(float *output, unsigned int nFrames,
-                            unsigned int channels) = 0;
+                            unsigned int channels,
+                            const types::RenderContext &context) = 0;
 
         virtual void reset() = 0;
 

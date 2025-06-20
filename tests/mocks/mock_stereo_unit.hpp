@@ -11,8 +11,8 @@ class MockStereoUnit : public dtracker::audio::playback::PlaybackUnit
     float rightValue = 1.0f;
     bool finishedAfterRender = false;
 
-    void render(float *buffer, unsigned int frames,
-                unsigned int channels) override
+    void render(float *buffer, unsigned int frames, unsigned int channels,
+                const dtracker::audio::types::RenderContext &context) override
     {
         for (unsigned int i = 0; i < frames; ++i)
         {

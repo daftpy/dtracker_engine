@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dtracker/audio/playback/playback_unit.hpp>
+#include <dtracker/audio/types.hpp>
 #include <memory>
 #include <vector>
 
@@ -17,8 +18,8 @@ namespace dtracker::audio::playback
         virtual void addUnit(std::shared_ptr<PlaybackUnit> unit);
 
         // Renders audio by mixing all active units into the output buffer
-        void render(float *buffer, unsigned int nFrames,
-                    unsigned int channels) override;
+        void render(float *buffer, unsigned int nFrames, unsigned int channels,
+                    const types::RenderContext &context) override;
 
         void reset() override;
 

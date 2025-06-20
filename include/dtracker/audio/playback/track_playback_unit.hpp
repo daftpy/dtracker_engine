@@ -27,8 +27,8 @@ namespace dtracker::audio::playback
         void setLooping(bool shouldLoop);
 
         // --- Overridden virtual functions ---
-        void render(float *buffer, unsigned int nFrames,
-                    unsigned int channels) override;
+        void render(float *buffer, unsigned int nFrames, unsigned int channels,
+                    const types::RenderContext &context) override;
         void reset() override;
         bool isFinished() const override;
 

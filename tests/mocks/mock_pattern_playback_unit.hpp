@@ -28,8 +28,8 @@ class MockPatternPlaybackUnit
 
     // --- Overridden Methods ---
 
-    void render(float *buffer, unsigned int nFrames,
-                unsigned int channels) override
+    void render(float *buffer, unsigned int nFrames, unsigned int channels,
+                const dtracker::audio::types::RenderContext &context) override
     {
         // For the test, we don't need to render real audio. We just
         // need to record that this method was called.

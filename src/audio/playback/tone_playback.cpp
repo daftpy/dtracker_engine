@@ -25,7 +25,8 @@ namespace dtracker::audio::playback
 
     // Render audio into the output buffer by generating a sine wave
     void TonePlayback::render(float *output, unsigned int nFrames,
-                              unsigned int channels)
+                              unsigned int channels,
+                              const types::RenderContext &context)
     {
         const float twoPi = 2.0f * static_cast<float>(M_PI);
         const float phaseInc = twoPi * m_sine.frequency / m_sine.sampleRate;

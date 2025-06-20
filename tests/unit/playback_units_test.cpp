@@ -11,12 +11,15 @@
 #include <dtracker/audio/playback/proxy_playback_unit.hpp>
 #include <dtracker/audio/playback/sample_playback_unit.hpp>
 #include <dtracker/audio/playback/track_playback_unit.hpp>
+#include <dtracker/audio/types.hpp>
 #include <dtracker/sample/types.hpp>
 #include <memory>
 #include <thread>
 #include <vector>
 
 using namespace dtracker::audio;
+
+types::RenderContext context;
 
 class PatternPlaybackTest : public ::testing::Test
 {
@@ -48,7 +51,7 @@ TEST(ProxyPlaybackUnit, DelegatesRenderCall)
     proxy.setDelegate(&mock);
 
     float dummyBuffer[64] = {0};
-    proxy.render(dummyBuffer, 32, 2);
+    proxy.render(dummyBuffer, 32, 2, context);
 
     EXPECT_EQ(mock.renderCallCount, 1)
         << "ProxyPlaybackUnit did not forward render() call to delegate";
@@ -80,7 +83,7 @@ TEST(ProxyPlaybackUnit, ThreadSafeDelegateAccess)
             float dummy[128];
             while (!done)
             {
-                proxy.render(dummy, 64, 2);
+                proxy.render(dummy, 64, 2, context);
             }
         });
 
@@ -99,7 +102,7 @@ TEST(ProxyPlaybackUnit, NullDelegateRendersSilence)
     std::fill_n(buffer, 64, 1.0f); // Pre-fill with non-zero.
     proxy.setDelegate(nullptr);
 
-    proxy.render(buffer, 32, 2);
+    proxy.render(buffer, 32, 2, context);
 
     for (float sample : buffer)
         EXPECT_EQ(sample, 0.0f) << "Expected silence from null delegate";
@@ -124,7 +127,7 @@ TEST(SamplePlaybackTest, CompletesPlaybackAndResets)
     EXPECT_FALSE(unit->isFinished());
 
     // Render the full sample (50 stereo frames).
-    unit->render(buffer.data(), 50, 2);
+    unit->render(buffer.data(), 50, 2, context);
     EXPECT_TRUE(unit->isFinished());
 
     // Reset and confirm it's ready to play again.
@@ -133,7 +136,7 @@ TEST(SamplePlaybackTest, CompletesPlaybackAndResets)
 
     // Render again after reset.
     std::fill(buffer.begin(), buffer.end(), 0.0f);
-    unit->render(buffer.data(), 50, 2);
+    unit->render(buffer.data(), 50, 2, context);
     EXPECT_TRUE(unit->isFinished());
 
     // Spot-check that the audio content is correct.
@@ -154,7 +157,7 @@ TEST(SamplePlaybackTest, PadsWithSilenceIfBufferLargerThanSample)
 
     std::vector<float> buffer(6, 99.0f); // Request 3 frames.
 
-    unit->render(buffer.data(), 3, 2);
+    unit->render(buffer.data(), 3, 2, context);
 
     // Expect: [1.0, -1.0, 0.0, 0.0, 0.0, 0.0]
     EXPECT_FLOAT_EQ(buffer[0], 1.0f);
@@ -174,7 +177,7 @@ TEST(SamplePlaybackUnit, ResetRestartsPlaybackFromBeginning)
     auto unit = playback::makePlaybackUnit(std::move(descriptor));
 
     std::vector<float> buffer(20, 0.0f);
-    unit->render(buffer.data(), 10, 2);
+    unit->render(buffer.data(), 10, 2, context);
     EXPECT_TRUE(unit->isFinished());
 
     unit->reset();
@@ -182,7 +185,7 @@ TEST(SamplePlaybackUnit, ResetRestartsPlaybackFromBeginning)
 
     // Render again and verify the content is from the beginning.
     std::fill(buffer.begin(), buffer.end(), 0.0f);
-    unit->render(buffer.data(), 10, 2);
+    unit->render(buffer.data(), 10, 2, context);
 
     for (float sample : buffer)
         EXPECT_NEAR(sample, 0.25f, 0.0001f);
@@ -199,7 +202,7 @@ TEST(MixerPlaybackUnit, RendersSilenceWhenEmpty)
     float buffer[64];
     std::fill_n(buffer, 64, 1.0f); // Pre-fill to detect change.
 
-    mixer.render(buffer, 32, 2);
+    mixer.render(buffer, 32, 2, context);
 
     for (float sample : buffer)
         EXPECT_FLOAT_EQ(sample, 0.0f) << "Expected silence when empty";
@@ -215,7 +218,7 @@ TEST(MixerPlaybackUnit, MixesSingleUnitCorrectly)
     mixer.addUnit(std::move(mock));
 
     float buffer[64];
-    mixer.render(buffer, 32, 2);
+    mixer.render(buffer, 32, 2, context);
 
     for (float sample : buffer)
         EXPECT_FLOAT_EQ(sample, 0.5f);
@@ -233,8 +236,8 @@ TEST(MixerPlaybackUnit, RemovesFinishedUnits)
     mixer.addUnit(std::move(mock));
 
     float buffer[64];
-    mixer.render(buffer, 32,
-                 2); // This render call should remove the finished unit.
+    mixer.render(buffer, 32, 2,
+                 context); // This render call should remove the finished unit.
 
     EXPECT_TRUE(mixer.isFinished()); // The mixer should now be empty.
 }
@@ -253,7 +256,7 @@ TEST(MixerPlaybackUnit, ClearRemovesAllUnits)
     // Confirm it now renders silence.
     float buffer[64];
     std::fill_n(buffer, 64, -1.0f);
-    mixer.render(buffer, 32, 2);
+    mixer.render(buffer, 32, 2, context);
 
     for (float sample : buffer)
         EXPECT_FLOAT_EQ(sample, 0.0f);
@@ -270,7 +273,7 @@ TEST(TrackPlaybackUnit, RendersSilenceWhenEmpty)
     float buffer[64];
     std::fill_n(buffer, 64, 1.0f); // Pre-fill to detect changes.
 
-    track.render(buffer, 32, 2);
+    track.render(buffer, 32, 2, context);
 
     for (float sample : buffer)
         EXPECT_FLOAT_EQ(sample, 0.0f);
@@ -290,7 +293,7 @@ TEST(TrackPlaybackUnit, AppliesVolumeAndPanCorrectly)
     track.addUnit(std::move(unit));
 
     float buffer[64] = {};
-    track.render(buffer, 32, 2);
+    track.render(buffer, 32, 2, context);
 
     // Expect left channel at 50% volume and right channel silent.
     for (unsigned int i = 0; i < 32; ++i)
@@ -311,7 +314,7 @@ TEST(TrackPlaybackUnit, PanBiasesLeftOrRight)
     trackLeft.setPan(-1.0f);
     trackLeft.addUnit(std::move(mockLeft));
     float leftBuffer[64] = {};
-    trackLeft.render(leftBuffer, 32, 2);
+    trackLeft.render(leftBuffer, 32, 2, context);
     for (unsigned int i = 0; i < 64; i += 2)
     {
         EXPECT_FLOAT_EQ(leftBuffer[i], 1.0f);
@@ -325,7 +328,7 @@ TEST(TrackPlaybackUnit, PanBiasesLeftOrRight)
     trackRight.setPan(1.0f);
     trackRight.addUnit(std::move(mockRight));
     float rightBuffer[64] = {};
-    trackRight.render(rightBuffer, 32, 2);
+    trackRight.render(rightBuffer, 32, 2, context);
     for (unsigned int i = 0; i < 64; i += 2)
     {
         EXPECT_FLOAT_EQ(rightBuffer[i], 0.0f);
@@ -372,7 +375,7 @@ TEST_F(PatternPlaybackTest, TriggersNotesFromPool)
 
     // Act: Render enough audio to play through the entire pattern.
     std::vector<float> buffer(13230 * 2); // 3 steps * 100ms = 300ms
-    patternUnit.render(buffer.data(), 13230, 2);
+    patternUnit.render(buffer.data(), 13230, 2, context);
 
     // Assert: The pool's acquire() method should have been called twice, once
     // for each non-rest note (ID 1 and 2).
@@ -406,7 +409,7 @@ TEST(TrackPlaybackUnit, PlaysPatternsSequentially)
     // --- First Render Call ---
     // Act: Render one block of audio.
     float buffer[128];
-    track.render(buffer, 64, 2);
+    track.render(buffer, 64, 2, context);
 
     // Assert: Only the first pattern should have been rendered.
     EXPECT_EQ(p1_ptr->renderCallCount, 1);
@@ -417,11 +420,11 @@ TEST(TrackPlaybackUnit, PlaysPatternsSequentially)
     // p1_ptr->isFinished_flag = true;
 
     // Act: Render another block of audio.
-    track.render(buffer, 64, 2);
+    track.render(buffer, 64, 2, context);
 
     // p2_ptr->isFinished_flag = true;
 
-    track.render(buffer, 64, 2);
+    track.render(buffer, 64, 2, context);
 
     // Assert: The track should have moved to the second pattern.
     // The first pattern was not rendered again, but the second one was.

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <dtracker/audio/playback/playback_unit.hpp>
+#include <dtracker/audio/types.hpp>
 #include <vector>
 
 class MockPlaybackUnit : public dtracker::audio::playback::PlaybackUnit
@@ -11,8 +12,8 @@ class MockPlaybackUnit : public dtracker::audio::playback::PlaybackUnit
     float fillValue = 0.0f;
     bool finishedAfterRender = false;
 
-    void render(float *buffer, unsigned int frames,
-                unsigned int channels) override
+    void render(float *buffer, unsigned int frames, unsigned int channels,
+                const dtracker::audio::types::RenderContext &context) override
     {
         renderCallCount++;
         std::fill(buffer, buffer + frames * channels, fillValue);

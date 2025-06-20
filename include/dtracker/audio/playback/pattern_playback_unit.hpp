@@ -35,8 +35,8 @@ namespace dtracker::audio::playback
 
         /// Performs one block of processing, scheduling new notes and mixing
         /// active ones.
-        void render(float *buffer, unsigned int nFrames,
-                    unsigned int channels) override;
+        void render(float *buffer, unsigned int nFrames, unsigned int channels,
+                    const types::RenderContext &context) override;
 
         /// Returns true once the pattern has played through one full cycle
         /// AND all of its triggered notes have finished their playback.

@@ -1,5 +1,6 @@
 #include <dtracker/audio/engine.hpp>
 #include <dtracker/audio/playback/tone_playback.hpp>
+#include <dtracker/audio/types.hpp>
 #include <iostream>
 
 #ifndef M_PI
@@ -20,6 +21,8 @@ namespace dtracker::audio
         if (status)
             std::cerr << "Stream underflow/overflow detected!\n";
 
+        dtracker::audio::types::RenderContext context;
+
         float *buffer = static_cast<float *>(outputBuffer);
         constexpr unsigned int channels = 2;
 
@@ -27,9 +30,10 @@ namespace dtracker::audio
         std::memset(buffer, 0, sizeof(float) * nFrames * channels);
 
         // Only attempt rendering if a valid unit is provided
-        if (auto *unit = static_cast<playback::PlaybackUnit *>(userData))
+        if (auto *unit = static_cast<playback::ProxyPlaybackUnit *>(userData))
         {
-            unit->render(buffer, nFrames, channels);
+            context.isLooping = unit->isLooping();
+            unit->render(buffer, nFrames, channels, context);
         }
         else
         {

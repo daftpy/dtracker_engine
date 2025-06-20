@@ -20,4 +20,9 @@ namespace dtracker::audio::types
         unsigned int bitDepth;
         unsigned int numChannels;
     };
+
+    struct RenderContext
+    {
+        bool isLooping{false};
+    };
 } // namespace dtracker::audio::types

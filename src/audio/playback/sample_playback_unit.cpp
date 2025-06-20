@@ -17,7 +17,8 @@ namespace dtracker::audio::playback
     }
 
     void SamplePlaybackUnit::render(float *buffer, unsigned int frames,
-                                    unsigned int channels)
+                                    unsigned int channels,
+                                    const types::RenderContext &context)
     {
         const auto pcmPtr = m_descriptor.pcmData();
         if (!pcmPtr || channels != 2)

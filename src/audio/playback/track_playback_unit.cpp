@@ -24,7 +24,8 @@ namespace dtracker::audio::playback
 
     // This is the new, sequential rendering logic.
     void TrackPlaybackUnit::render(float *buffer, unsigned int nFrames,
-                                   unsigned int channels)
+                                   unsigned int channels,
+                                   const types::RenderContext &context)
     {
         // First, check if we've already finished the entire sequence.
         if (isFinished() || m_units.size() == 0)
@@ -35,7 +36,7 @@ namespace dtracker::audio::playback
 
         // Get the current pattern.
         auto &currentUnit = m_units[m_currentUnitIndex];
-        currentUnit->render(buffer, nFrames, channels);
+        currentUnit->render(buffer, nFrames, channels, context);
 
         // --- Apply this track's own volume and pan to the pattern's output ---
         if (channels == 2)
@@ -54,7 +55,7 @@ namespace dtracker::audio::playback
         if (currentUnit->hasFinishedLoop())
         {
             // ...and looping is on, reset the index back to the beginning.
-            if (m_isLooping)
+            if (context.isLooping)
             {
                 // Reset the current pattern unit
                 currentUnit->reset();

@@ -9,11 +9,12 @@ namespace dtracker::audio::playback
     // Renders audio from the currently active playback unit.
     // If no unit is set, fills the buffer with silence.
     void ProxyPlaybackUnit::render(float *buffer, unsigned int frames,
-                                   unsigned int channels)
+                                   unsigned int channels,
+                                   const types::RenderContext &context)
     {
         PlaybackUnit *unit = m_delegate.load(std::memory_order_acquire);
         if (unit)
-            unit->render(buffer, frames, channels);
+            unit->render(buffer, frames, channels, context);
         else
             std::fill(buffer, buffer + (frames * channels), 0.0f);
     }
@@ -38,6 +39,17 @@ namespace dtracker::audio::playback
         {
             unit->reset();
         }
+    }
+
+    void
+    dtracker::audio::playback::ProxyPlaybackUnit::setIsLooping(bool shouldLoop)
+    {
+        m_isLooping.store(shouldLoop, std::memory_order_release);
+    }
+
+    bool dtracker::audio::playback::ProxyPlaybackUnit::isLooping() const
+    {
+        return m_isLooping.load(std::memory_order_acquire);
     }
 
     // Returns true if playback is finished or if no delegate is set.

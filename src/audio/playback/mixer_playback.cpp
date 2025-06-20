@@ -13,7 +13,8 @@ namespace dtracker::audio::playback
 
     // Mixes all active units into the provided output buffer
     void MixerPlaybackUnit::render(float *buffer, unsigned int nFrames,
-                                   unsigned int channels)
+                                   unsigned int channels,
+                                   const types::RenderContext &context)
     {
         // Start with silence
         std::fill(buffer, buffer + nFrames * channels, 0.0f);
@@ -23,8 +24,9 @@ namespace dtracker::audio::playback
 
         for (auto it = m_units.begin(); it != m_units.end();)
         {
-            std::fill(temp.begin(), temp.end(), 0.0f);     // Zero the temp
-            (*it)->render(temp.data(), nFrames, channels); // Render to temp
+            std::fill(temp.begin(), temp.end(), 0.0f); // Zero the temp
+            (*it)->render(temp.data(), nFrames, channels,
+                          context); // Render to temp
 
             // Mix into main buffer
             for (unsigned int i = 0; i < nFrames * channels; ++i)

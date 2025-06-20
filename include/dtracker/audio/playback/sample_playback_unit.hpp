@@ -21,8 +21,8 @@ namespace dtracker::audio::playback
         explicit SamplePlaybackUnit(sample::types::SampleDescriptor descriptor);
 
         /// Renders the next chunk of audio from the sample buffer.
-        void render(float *buffer, unsigned int frames,
-                    unsigned int channels) override;
+        void render(float *buffer, unsigned int frames, unsigned int channels,
+                    const types::RenderContext &context) override;
 
         /// Returns true if the playback position has reached the end of the
         /// sample.

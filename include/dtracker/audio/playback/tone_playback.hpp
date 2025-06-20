@@ -12,8 +12,8 @@ namespace dtracker::audio::playback
         explicit TonePlayback(float sampleRate);
         explicit TonePlayback(float freq, float sampleRate);
 
-        void render(float *output, unsigned int nFrames,
-                    unsigned int channels) override;
+        void render(float *output, unsigned int nFrames, unsigned int channels,
+                    const types::RenderContext &context) override;
 
         void reset() override;
         bool isFinished() const override;
