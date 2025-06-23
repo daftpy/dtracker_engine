@@ -32,7 +32,9 @@ namespace dtracker::audio
         void playTrack(int trackId) override;
 
         /// Sets whether playback should loop or play once.
-        void setLooping(bool shouldLoop) override;
+        void setLoopPlayback(bool shouldLoop) override;
+
+        bool loopPlayback() const;
 
       private:
         bool m_isLooping{true};

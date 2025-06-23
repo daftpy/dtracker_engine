@@ -192,6 +192,11 @@ namespace dtracker::audio
         return m_mixerUnit.get();
     }
 
+    playback::ProxyPlaybackUnit *dtracker::audio::Engine::proxyUnit()
+    {
+        return m_proxyUnit.get();
+    }
+
     const types::AudioSettings &dtracker::audio::Engine::getSettings() const
     {
         // TODO: insert return statement here

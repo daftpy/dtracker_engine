@@ -27,6 +27,7 @@ namespace dtracker::audio
         bool isStreamRunning() const override;
         void setOutputDevice(unsigned int deviceId) override;
         playback::MixerPlaybackUnit *mixerUnit() override;
+        playback::ProxyPlaybackUnit *proxyUnit() override;
         DeviceManager createDeviceManager() const override;
         types::AudioSettings const &getSettings() const override;
 

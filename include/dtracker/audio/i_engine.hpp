@@ -2,6 +2,7 @@
 
 #include <dtracker/audio/device_manager.hpp>
 #include <dtracker/audio/playback/mixer_playback.hpp>
+#include <dtracker/audio/playback/proxy_playback_unit.hpp>
 #include <optional>
 
 namespace dtracker::audio
@@ -31,6 +32,8 @@ namespace dtracker::audio
         /// Gets a raw pointer to the main mixer unit.
         /// Clients use this to add playable audio sources to the engine.
         virtual playback::MixerPlaybackUnit *mixerUnit() = 0;
+
+        virtual playback::ProxyPlaybackUnit *proxyUnit() = 0;
 
         /// Creates a helper object for querying available audio devices.
         virtual DeviceManager createDeviceManager() const = 0;

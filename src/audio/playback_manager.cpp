@@ -129,9 +129,21 @@ namespace dtracker::audio
         m_engine->mixerUnit()->addUnit(std::move(trackPlaybackUnit));
     }
 
-    void dtracker::audio::PlaybackManager::setLooping(bool shouldLoop)
+    void dtracker::audio::PlaybackManager::setLoopPlayback(bool shouldLoop)
     {
-        m_isLooping = shouldLoop;
+        if (m_engine != nullptr)
+        {
+            m_engine->proxyUnit()->setIsLooping(shouldLoop);
+        }
+    }
+
+    bool dtracker::audio::PlaybackManager::loopPlayback() const
+    {
+        if (m_engine != nullptr)
+        {
+            return m_engine->proxyUnit()->isLooping();
+        }
+        return false;
     }
 
 } // namespace dtracker::audio

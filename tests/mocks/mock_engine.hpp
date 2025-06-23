@@ -55,6 +55,11 @@ class MockEngine : public dtracker::audio::IEngine
         return dtracker::audio::types::AudioSettings{};
     }
 
+    dtracker::audio::playback::ProxyPlaybackUnit *proxyUnit() override
+    {
+        return nullptr;
+    }
+
   private:
     std::unique_ptr<MockMixerPlaybackUnit> m_mockMixer;
     bool m_streamIsRunning = false;
