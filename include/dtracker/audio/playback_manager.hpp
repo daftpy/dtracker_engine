@@ -2,9 +2,11 @@
 
 #include <dtracker/audio/i_engine.hpp>
 #include <dtracker/audio/i_playback_manager.hpp>
+#include <dtracker/audio/playback/track_playback_unit.hpp>
 #include <dtracker/audio/playback/unit_pool.hpp>
 #include <dtracker/sample/i_manager.hpp>
 #include <dtracker/tracker/i_track_manager.hpp>
+
 
 namespace dtracker::audio
 {
@@ -34,9 +36,14 @@ namespace dtracker::audio
         /// Sets whether playback should loop or play once.
         void setLoopPlayback(bool shouldLoop) override;
 
+        void playAllTracks() override;
+
         bool loopPlayback() const;
 
       private:
+        std::unique_ptr<playback::TrackPlaybackUnit>
+        buildTrackPlayer(int trackId);
+
         bool m_isLooping{true};
 
         IEngine *m_engine{nullptr};
