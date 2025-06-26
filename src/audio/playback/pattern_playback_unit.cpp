@@ -30,6 +30,12 @@ namespace dtracker::audio::playback
             return;
         }
 
+        // --- DYNAMIC TIMING CALCULATION ---
+        // Calculate the duration of a single beat in milliseconds from the BPM.
+        const float msPerBeat = 60000.0f / context.bpm;
+        // Calculate the duration of a single step for this specific pattern.
+        const float stepIntervalMs = msPerBeat / m_pattern.stepsPerBeat;
+
         // --- 1. SCHEDULING LOGIC ---
         // Only schedule new notes if the pattern hasn't completed its first
         // full loop.
@@ -44,7 +50,7 @@ namespace dtracker::audio::playback
         // Note: Only build notes when the currentStep reader is <
         // pattern.steps.size() When the playback manager is looping, it'll
         // reset the current step to start this process again
-        while (m_pattern.elapsedMs >= m_pattern.stepIntervalMs &&
+        while (m_pattern.elapsedMs >= stepIntervalMs &&
                m_pattern.currentStep < m_pattern.steps.size())
         {
             // Get the sample to play
@@ -85,7 +91,7 @@ namespace dtracker::audio::playback
                 std::cout << "elapsed time " << m_pattern.elapsedMs << "\n";
             }
             // Prevents jitter
-            m_pattern.elapsedMs -= m_pattern.stepIntervalMs;
+            m_pattern.elapsedMs -= stepIntervalMs;
         }
 
         // --- 2. MIXING LOGIC ---

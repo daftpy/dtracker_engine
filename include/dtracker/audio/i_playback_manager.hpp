@@ -29,10 +29,14 @@ namespace dtracker::audio
         /// Prepares and starts playback of an entire track by its ID.
         virtual void playTrack(int trackId) = 0;
 
-        /// Prepares and starts playback of all tracks
+        /// Prepares and starts playback of all tracks.
         virtual void playAllTracks() = 0;
 
+        /// Set the playback looping state.
         virtual void setLoopPlayback(bool shouldLoop) = 0;
+
+        /// Sets the playback BPM state.
+        virtual void setBpm(float bpm) = 0;
     };
 
 } // namespace dtracker::audio

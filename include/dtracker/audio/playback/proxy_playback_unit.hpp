@@ -20,7 +20,11 @@ namespace dtracker::audio::playback
         void setIsLooping(bool shouldLoop);
         bool isLooping() const;
 
+        void setBpm(float bpm);
+        float bpm() const;
+
       private:
+        std::atomic<float> m_bpm{120.0f};
         std::atomic<bool> m_isLooping{false};
         std::atomic<PlaybackUnit *> m_delegate{nullptr}; // Not owning
     };

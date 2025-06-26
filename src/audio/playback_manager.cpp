@@ -155,4 +155,20 @@ namespace dtracker::audio
         return trackPlaybackUnit;
     }
 
+    void PlaybackManager::setBpm(float bpm)
+    {
+        if (m_engine)
+        {
+            m_bpm.store(bpm, std::memory_order_relaxed);
+
+            // Update the proxy so the audio thread sees the change.
+            m_engine->proxyUnit()->setBpm(bpm);
+        }
+    }
+
+    float PlaybackManager::bpm() const
+    {
+        return m_bpm;
+    }
+
 } // namespace dtracker::audio

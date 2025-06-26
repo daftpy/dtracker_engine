@@ -33,6 +33,7 @@ namespace dtracker::audio
         if (auto *unit = static_cast<playback::ProxyPlaybackUnit *>(userData))
         {
             context.isLooping = unit->isLooping();
+            context.bpm = unit->bpm(); // Get the current BPM
             unit->render(buffer, nFrames, channels, context);
         }
         else

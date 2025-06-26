@@ -60,4 +60,14 @@ namespace dtracker::audio::playback
         return unit ? unit->isFinished() : true;
     }
 
+    void dtracker::audio::playback::ProxyPlaybackUnit::setBpm(float bpm)
+    {
+        m_bpm.store(bpm, std::memory_order_relaxed);
+    }
+
+    float dtracker::audio::playback::ProxyPlaybackUnit::bpm() const
+    {
+        return m_bpm.load(std::memory_order_relaxed);
+    }
+
 } // namespace dtracker::audio::playback

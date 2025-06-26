@@ -11,6 +11,11 @@ namespace dtracker::tracker::types
     {
         std::vector<int> steps;
         float stepIntervalMs;
+
+        // ADD: The musical timing of the pattern.
+        // e.g., 4 = 16th notes, 8 = 32nd notes.
+        float stepsPerBeat = 4.0f;
+
         float elapsedMs = 0.0f;
         size_t currentStep = 0;
     };

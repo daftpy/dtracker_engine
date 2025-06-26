@@ -24,5 +24,6 @@ namespace dtracker::audio::types
     struct RenderContext
     {
         bool isLooping{false};
+        float bpm{120.0f};
     };
 } // namespace dtracker::audio::types
