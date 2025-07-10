@@ -7,9 +7,13 @@ The engine is built with a layered architecture that emphasizes testability and 
 
 - **Interface-based Design:** Core components like `Engine` and `PlaybackManager` are defined by abstract interfaces (`IEngine` and `IPlaybackManager`). This allows for easy mocking and testing.
 
-- **Real-Time Safety:** The engine uses a custom **Object Pool** to pre-allocate and recycle audio players (`SamplePlaybackUnit`s). This eliminates dynamic memory allocation on the critical audio thread, preventing audio glitches and ensuring stable performance.
+- **Real-Time Safety:** The engine guarantees real-time safety by eliminating dynamic memory allocation on the critical audio thread. Both pools use smart pointers with custom deleters to ensure automatic resource management.
+    - A `UnitPool` pre-allocates and recycles SamplePlaybackUnit objects for audio playback
+    - A `BufferPool` pre-allocates and recycles audio buffers (PCMData) for thread-safe data transport to the GUI.
 
 - **Sample Instancing:** The `SampleManager` separates the concept of raw audio samples stored in the cache and the instances stored in the manager. This allows hundreds of sounds in a project to efficiently share the same underlying audio data safely.
+
+- **Thread-Safe Communication**: A high-performance, lock-free SPSC (Single-Producer, Single-Consumer) queue is used to safely "tap" the final audio output and stream visualization data from the real-time audio thread without blocking.
 
 - **Component Layers:** The system is organized into clear service layers:
   - `Engine`: The low-level service that communicates with `RtAudio`.
@@ -33,8 +37,9 @@ This hierarchy allows complex arrangements to be built from simple, reusable par
 ## Features
 
 - **C++17 Design** Utilizes smart pointers and move semantics, when possible, to prevent memory errors and improve efficiency.
+- **Dynamic Playback Control:** A `RenderContext` is passed down the entire playback graph on every audio frame. This allows global parameters like BPM and looping state to be changed on the fly from the UI in a completely thread-safe manner.
 - **Decoupled Architecture:** Core components are abstracted behind interfaces for improved flexibility and testability.
-- **Thread-Safe Sample Management:** A central manager with LRU cache provides efficient and shared access to audio data.
+- **Thread-Safe Data Management**: The engine uses multiple strategies for thread safety. The `SampleManager` and `TrackManager` use `std::mutex` to protect their data structures. The `PlaybackManager` uses `std::atomic` for simple state like BPM, and `std::mutex` to manage the lifecycle of shared visualization queues. The `SampleManager` also features a thread-safe LRU cache for efficient memory usage.
 - **Comprehensive Test Suite:** Built with GoogleTest and a clean separation between unit and integration tests.
 
 ## Roadmap / Future Work
