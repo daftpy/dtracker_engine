@@ -16,6 +16,7 @@ add_executable(audio_engine_test
   unit/playback_units_test.cpp
   unit/track_manager_test.cpp
   unit/unit_pool_test.cpp
+  unit/buffer_pool_test.cpp
   integration/engine_integration_test.cpp
 )
 

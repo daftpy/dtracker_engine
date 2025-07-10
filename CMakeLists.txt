@@ -35,6 +35,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(RtAudio)
 
+FetchContent_Declare(
+    SPSCQueue
+    GIT_REPOSITORY https://github.com/rigtorp/SPSCQueue.git
+    GIT_TAG        v1.1 # Using a specific version for a stable build
+)
+FetchContent_MakeAvailable(SPSCQueue)
+
 # --- dtracker_engine static lib ---
 add_library(dtracker_engine STATIC
     src/audio/engine.cpp
@@ -47,6 +54,7 @@ add_library(dtracker_engine STATIC
     src/audio/playback/track_playback_unit.cpp
     src/audio/playback/pattern_playback_unit.cpp
     src/audio/playback/unit_pool.cpp
+    src/audio/playback/buffer_pool.cpp
     src/tracker/track_manager.cpp
     src/sample/cache.cpp
     src/sample/manager.cpp
@@ -59,7 +67,11 @@ target_include_directories(dtracker_engine
         ${CMAKE_CURRENT_SOURCE_DIR}/include/dtracker                  # For internal engine .cpp/.hpp: #include "audio/engine.hpp"
 )
 
-target_link_libraries(dtracker_engine PUBLIC rtaudio)
+target_link_libraries(dtracker_engine
+    PUBLIC
+        rtaudio
+        SPSCQueue::SPSCQueue
+)
 
 # --- Add tests only when enabled ---
 if(BUILD_TESTING)

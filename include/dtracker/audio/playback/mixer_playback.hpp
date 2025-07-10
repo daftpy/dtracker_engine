@@ -1,5 +1,8 @@
 #pragma once
 
+#include <rigtorp/SPSCQueue.h> // Include SPSCQueue
+
+#include <dtracker/audio/playback/buffer_pool.hpp> // Include BufferPool
 #include <dtracker/audio/playback/playback_unit.hpp>
 #include <dtracker/audio/types.hpp>
 #include <memory>
@@ -29,8 +32,22 @@ namespace dtracker::audio::playback
         // Returns true if no active units remain (i.e. playback is silent)
         bool isFinished() const override;
 
+        /// Sets the buffer pool to use for acquiring transport buffers.
+        void setBufferPool(BufferPool *pool);
+
+        /// Sets the queue to push waveform data to for visualization.
+        void setWaveformQueue(
+            rigtorp::SPSCQueue<BufferPool::PooledBufferPtr> *queue);
+
       private:
         // Holds all active playback units being mixed
         std::vector<std::shared_ptr<PlaybackUnit>> m_units;
+
+        /// A non-owning pointer to the pool of recycled audio buffers.
+        BufferPool *m_bufferPool{nullptr};
+
+        /// A non-owning pointer to the thread-safe queue for the master output.
+        rigtorp::SPSCQueue<BufferPool::PooledBufferPtr> *m_waveformQueue{
+            nullptr};
     };
 } // namespace dtracker::audio::playback

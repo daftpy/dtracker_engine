@@ -5,6 +5,13 @@
 
 namespace dtracker::audio::playback
 {
+    TrackPlaybackUnit::TrackPlaybackUnit(
+        BufferPool *bufferPool,
+        rigtorp::SPSCQueue<BufferPool::PooledBufferPtr> *waveformQueue)
+        : m_bufferPool(bufferPool), m_waveformQueue(waveformQueue)
+    {
+    }
+
     // Renamed from addSample to addUnit to be more generic.
     void TrackPlaybackUnit::addUnit(std::unique_ptr<PatternPlaybackUnit> unit)
     {
@@ -22,28 +29,25 @@ namespace dtracker::audio::playback
         m_pan = std::clamp(p, -1.0f, 1.0f);
     }
 
-    // This is the new, sequential rendering logic.
     void TrackPlaybackUnit::render(float *buffer, unsigned int nFrames,
                                    unsigned int channels,
                                    const types::RenderContext &context)
     {
-        // First, check if we've already finished the entire sequence.
-        if (isFinished() || m_units.size() == 0)
+        // Your existing render logic to play the sequence and apply vol/pan
+        // comes first. It correctly fills the `buffer` with processed audio.
+        if (isFinished() || m_units.empty())
         {
             std::fill(buffer, buffer + nFrames * channels, 0.0f);
             return;
         }
 
-        // Get the current pattern.
         auto &currentUnit = m_units[m_currentUnitIndex];
         currentUnit->render(buffer, nFrames, channels, context);
 
-        // --- Apply this track's own volume and pan to the pattern's output ---
         if (channels == 2)
         {
             float leftGain = m_volume * (1.0f - std::max(0.0f, m_pan));
             float rightGain = m_volume * (1.0f + std::min(0.0f, m_pan));
-
             for (unsigned int i = 0; i < nFrames; ++i)
             {
                 buffer[i * 2] *= leftGain;
@@ -51,25 +55,51 @@ namespace dtracker::audio::playback
             }
         }
 
-        // --- Check if the current pattern has finished its loop ---
+        // TODO: Implement the waveform tap for individual tracks.
+        // Currently, enabling this exhausts the buffer pool too quickly.
+        // This is because a resource leak. The buffers acquired by the
+        // TrackPlaybackUnits are pushed into queues that are never emptied.
+        // After a few seconds, all 128 buffers from the shared BufferPool
+        // are stuck inside these unread queues. The pool runs dry,
+        // m_bufferPool->acquire() starts returning nullptr, and the waveform
+        // tap in the MixerPlaybackUnit stops working because it can't get any
+        // more empty buffers.
+
+        // --- WAVEFORM TAP ---
+        // At this point, 'buffer' contains the final processed audio.
+        // if (m_bufferPool && m_waveformQueue)
+        // {
+        //     // Acquire a recycled buffer from the pool.
+        //     auto transportBuffer = m_bufferPool->acquire();
+        //     if (transportBuffer)
+        //     {
+        //         // Copy this frame's audio into the transport buffer.
+        //         size_t samplesToCopy = std::min((size_t)nFrames * channels,
+        //                                         transportBuffer->size());
+        //         memcpy(transportBuffer->data(), buffer,
+        //                samplesToCopy * sizeof(float));
+
+        //         // Push the smart pointer to the buffer onto the lock-free
+        //         // queue.
+        //         // If the push fails (queue is full), the transportBuffer is
+        //         // destroyed here, returning the raw buffer to the pool.
+        //         m_waveformQueue->try_push(std::move(transportBuffer));
+        //     }
+        // }
+
+        // Handle looping behavior
         if (currentUnit->hasFinishedLoop())
         {
-            // ...and looping is on, reset the index back to the beginning.
             if (context.isLooping)
             {
-                // Reset the current pattern unit
+                // Reset the current pattern and go back to the first pattern
                 currentUnit->reset();
-
-                // Stick to the same/first pattern
                 m_currentUnitIndex = 0;
             }
-            // If we have more patterns to play
             else if (m_currentUnitIndex < m_units.size() - 1)
             {
-                // Reset the current pattern unit
+                // Reset the current pattern and move onto the next pattern
                 currentUnit->reset();
-
-                // Move to the next pattern unit
                 m_currentUnitIndex++;
             }
         }
@@ -96,11 +126,6 @@ namespace dtracker::audio::playback
                m_units[m_currentUnitIndex]
                    ->isFinished(); // ensure the current pattern is done
                                    // rendering before reporting finished
-    }
-
-    void TrackPlaybackUnit::setLooping(bool shouldLoop)
-    {
-        m_isLooping = shouldLoop;
     }
 
 } // namespace dtracker::audio::playback

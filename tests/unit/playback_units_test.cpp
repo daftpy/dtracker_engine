@@ -400,7 +400,7 @@ TEST(TrackPlaybackUnit, PlaysPatternsSequentially)
     MockPatternPlaybackUnit *p1_ptr = pattern1.get();
     MockPatternPlaybackUnit *p2_ptr = pattern2.get();
 
-    track.setLooping(false);
+    // track.setLooping(false);
 
     track.addUnit(std::move(pattern1));
     track.addUnit(std::move(pattern2));

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <dtracker/audio/playback/buffer_pool.hpp>
 #include <dtracker/audio/playback/sample_playback_unit.hpp>
 #include <memory>
 
@@ -37,6 +38,8 @@ namespace dtracker::audio
 
         /// Sets the playback BPM state.
         virtual void setBpm(float bpm) = 0;
+
+        virtual playback::BufferPool *getBufferPool() = 0;
     };
 
 } // namespace dtracker::audio

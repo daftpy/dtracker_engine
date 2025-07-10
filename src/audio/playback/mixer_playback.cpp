@@ -4,6 +4,16 @@
 
 namespace dtracker::audio::playback
 {
+    void MixerPlaybackUnit::setBufferPool(BufferPool *pool)
+    {
+        m_bufferPool = pool;
+    }
+
+    void MixerPlaybackUnit::setWaveformQueue(
+        rigtorp::SPSCQueue<BufferPool::PooledBufferPtr> *queue)
+    {
+        m_waveformQueue = queue;
+    }
 
     // Adds a new playback unit to the internal list
     void MixerPlaybackUnit::addUnit(std::shared_ptr<PlaybackUnit> unit)
@@ -42,6 +52,28 @@ namespace dtracker::audio::playback
             else
             {
                 ++it;
+            }
+        }
+
+        // --- ADDED: WAVEFORM TAP ---
+        // At this point, 'buffer' contains the final, mixed master output.
+        if (m_bufferPool && m_waveformQueue)
+        {
+            // Acquire a recycled buffer from the pool.
+            auto transportBuffer = m_bufferPool->acquire();
+            if (transportBuffer)
+            {
+                // Copy this frame's audio into the transport buffer.
+                size_t samplesToCopy = std::min((size_t)nFrames * channels,
+                                                transportBuffer->size());
+                memcpy(transportBuffer->data(), buffer,
+                       samplesToCopy * sizeof(float));
+
+                // Push the smart pointer to the buffer onto the lock-free
+                // queue.
+                // If the push fails (queue is full), the transportBuffer is
+                // destroyed here, returning the raw buffer to the pool.
+                m_waveformQueue->try_push(std::move(transportBuffer));
             }
         }
     }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <rigtorp/SPSCQueue.h>
+
+#include <dtracker/audio/playback/buffer_pool.hpp>
 #include <dtracker/audio/playback/pattern_playback_unit.hpp>
 #include <dtracker/audio/playback/playback_unit.hpp>
 #include <memory>
@@ -13,6 +16,9 @@ namespace dtracker::audio::playback
     {
       public:
         TrackPlaybackUnit() = default;
+        TrackPlaybackUnit(
+            BufferPool *bufferPool,
+            rigtorp::SPSCQueue<BufferPool::PooledBufferPtr> *waveformQueue);
 
         /// Adds a new unit (e.g., a pattern) to the end of the playback
         /// sequence.
@@ -23,8 +29,6 @@ namespace dtracker::audio::playback
 
         /// Sets the track's stereo pan [-1.0 (L) to 1.0 (R)].
         void setPan(float p);
-
-        void setLooping(bool shouldLoop);
 
         // --- Overridden virtual functions ---
         void render(float *buffer, unsigned int nFrames, unsigned int channels,
@@ -43,6 +47,12 @@ namespace dtracker::audio::playback
         // playing.
         size_t m_currentUnitIndex{0};
 
-        bool m_isLooping{false};
+        /// A non-owning pointer to the pool of recycled audio buffers.
+        BufferPool *m_bufferPool{nullptr};
+
+        /// A non-owning pointer to the thread-safe queue for this specific
+        /// track.
+        rigtorp::SPSCQueue<BufferPool::PooledBufferPtr> *m_waveformQueue{
+            nullptr};
     };
 } // namespace dtracker::audio::playback
